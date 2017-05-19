@@ -1,5 +1,7 @@
 package com.isneaker.bot;
 
+import com.machinepublishers.jbrowserdriver.UserAgent;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -11,8 +13,16 @@ import java.util.concurrent.Executors;
  */
 public class BotMain {
 
+
+    public static String USERAGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36";
+
+    // build useragent
+    public static UserAgent USERAGENT_OBJ = null; // {UserAgent}
+
     //final static String URL = "http://www.adidas.com/yeezy";
-    final static String URL = "http://www.adidas.com/us/nmd_xr1-primeknit-shoes/BB2911.html";
+    //final static String URL = "http://adidas.bot.nu/yeezy/";
+    //final static String URL = "http://www.adidas.com/us/nmd_xr1-primeknit-shoes/BB2911.html";
+    final static String URL = "http://www.adidas.com/on/demandware.store/Sites-adidas-US-Site/en_US/Cart-MiniAddProduct?layer=Add%20To%20Bag%20overlay&pid=BB2911_630&Quantity=1&masterPid=BB2911add-to-cart-button=";
 
 
     // use config
@@ -20,10 +30,13 @@ public class BotMain {
 
 
     private static ProxyLoader proxyLoader;
-    private final Set<BotProxy> usedProxies = new HashSet<>();
     private static int threadsRunning = 0;
+    private static int count = 1;
 
     public static void main(String[] args) {
+
+        System.setProperty("webdriver.chrome.driver", "~/Downloads/chromedriver");
+
 
         try {
             proxyLoader = new ProxyLoader(new File(System.getProperty("user.dir") + "/proxies.txt"));
@@ -31,19 +44,22 @@ public class BotMain {
             e.printStackTrace();
         }
 
+        System.out.println("Loading proxies and tasks");
+
         Iterator<BotProxy> iterator = proxyLoader.getProxiesLoaded().keySet().iterator();
 
-        while(iterator.hasNext()) {
+        while(iterator.hasNext() && threadsRunning < count) {
             BotProxy proxy = iterator.next();
 
             SplashChecker thread = new SplashChecker(URL, proxy);
             executor.submit(thread);
+            threadsRunning++;
         }
 
-        while(threadsRunning < 10) {
+        while(threadsRunning < count) {
             SplashChecker thread = new SplashChecker(URL, null);
             executor.submit(thread);
+            threadsRunning++;
         }
     }
-
 }

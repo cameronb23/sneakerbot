@@ -1,5 +1,8 @@
 package com.isneaker.bot;
 
+import org.apache.http.HttpHost;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.asynchttpclient.*;
 import org.asynchttpclient.proxy.ProxyServer;
 
@@ -19,21 +22,27 @@ public class SplashChecker extends Thread {
     private static final String SELECTOR = "data-sitekey=";
 
     private final String url;
+    private final BotProxy proxy;
     private final AsyncHttpClient client;
     private Timer timer;
+    private BotBrowser browser;
 
 
     // SAVE COOKIES / SESSION DATA
 
     public SplashChecker(String url, BotProxy proxyConfig) {
         this.url = url;
+        this.proxy = proxyConfig;
 
         if(proxyConfig != null) {
+
+            // configure proxy auth
             Realm r = new Realm.Builder(proxyConfig.getUsername(), proxyConfig.getPassword())
                     .setScheme(Realm.AuthScheme.BASIC)
                     .setUsePreemptiveAuth(true)
                     .build();
 
+            // configure client for proxy support
             AsyncHttpClientConfig config = new DefaultAsyncHttpClientConfig.Builder()
                     .setProxyServer(new ProxyServer.Builder(proxyConfig.getAddress(), proxyConfig.getPort()).setRealm(r))
                     .build();
@@ -59,7 +68,7 @@ public class SplashChecker extends Thread {
 
     public void run() {
         timer = new Timer();
-        timer.schedule(new SplashTask(this.client), 10000);
+        timer.scheduleAtFixedRate(new SplashTask(this.client), 1000,  3000);
     }
 
     private class SplashTask extends TimerTask {
@@ -75,13 +84,16 @@ public class SplashChecker extends Thread {
             try {
                 String data = res.get().getResponseBody();
 
+                System.out.println("Got response");
+
                 boolean contains  = data.contains(SELECTOR);
 
-                if(contains) {
-                    timer.cancel();
-                    System.out.println("FOUND CAPTCHA ELEMENT");
-                    System.exit(0);
-                }
+                timer.cancel();
+                System.out.println("FOUND CAPTCHA ELEMENT");
+                System.out.println("COOKIES: \n" + res.get().getCookies().toString());
+
+                browser = new BotBrowser(new BrowserData(proxy, res.get().getCookies()));
+
             } catch(Exception ex) {
                 ex.printStackTrace();
             }
@@ -89,3 +101,4 @@ public class SplashChecker extends Thread {
 
     }
 }
+
