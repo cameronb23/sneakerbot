@@ -2,13 +2,9 @@ package com.isneaker.bot;
 
 import com.machinepublishers.jbrowserdriver.JBrowserDriver;
 import com.machinepublishers.jbrowserdriver.ProxyConfig;
-import com.machinepublishers.jbrowserdriver.RequestHeaders;
 import com.machinepublishers.jbrowserdriver.Settings;
-import org.apache.http.Header;
 import org.openqa.selenium.Cookie;
 
-import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.logging.Level;
 
 /**
@@ -56,11 +52,13 @@ public class BotBrowser {
 
         this.driver = new JBrowserDriver(set.build());
 
+        // go to cart page
         this.driver.get("https://www.adidas.com/on/demandware.store/Sites-adidas-US-Site/en_US/Cart-Show");
 
-        for(io.netty.handler.codec.http.cookie.Cookie old : settings.getCookies()) {
-            Cookie newCookie = new Cookie.Builder(old.name(), old.value()).build();
-
+        // set cookies and refresh
+        for(int i = 0; i < settings.getCookies().getCookies().size(); i++) {
+            org.apache.http.cookie.Cookie c = settings.getCookies().getCookies().get(i);
+            Cookie newCookie = createCookie(c);
 
 
             this.driver.manage().addCookie(newCookie);
@@ -69,7 +67,18 @@ public class BotBrowser {
         this.driver.navigate().refresh();
 
 
-        System.out.println(driver.getStatusCode());
+        System.out.println("Browser opened with status " + driver.getStatusCode());
+    }
+
+    public Cookie createCookie(org.apache.http.cookie.Cookie cookie) {
+        Cookie newCookie = new Cookie.Builder(cookie.getName(), cookie.getValue())
+                .domain(cookie.getDomain())
+                .path(cookie.getPath())
+                .expiresOn(cookie.getExpiryDate())
+                .isSecure(cookie.isSecure())
+                .build();
+
+        return newCookie;
     }
 
 }

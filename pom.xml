@@ -10,12 +10,6 @@
 
 
     <dependencies>
-        <dependency>
-            <groupId>org.asynchttpclient</groupId>
-            <artifactId>async-http-client</artifactId>
-            <version>LATEST</version>
-            <scope>compile</scope>
-        </dependency>
 
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>

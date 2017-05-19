@@ -20,9 +20,9 @@ public class BotMain {
     public static UserAgent USERAGENT_OBJ = null; // {UserAgent}
 
     //final static String URL = "http://www.adidas.com/yeezy";
-    //final static String URL = "http://adidas.bot.nu/yeezy/";
+    final static String URL = "http://adidas.bot.nu/yeezy/";
     //final static String URL = "http://www.adidas.com/us/nmd_xr1-primeknit-shoes/BB2911.html";
-    final static String URL = "http://www.adidas.com/on/demandware.store/Sites-adidas-US-Site/en_US/Cart-MiniAddProduct?layer=Add%20To%20Bag%20overlay&pid=BB2911_630&Quantity=1&masterPid=BB2911add-to-cart-button=";
+    //final static String URL = "http://www.adidas.com/on/demandware.store/Sites-adidas-US-Site/en_US/Cart-MiniAddProduct?layer=Add%20To%20Bag%20overlay&pid=BB2911_630&Quantity=1&masterPid=BB2911add-to-cart-button=";
 
 
     // use config
@@ -51,13 +51,13 @@ public class BotMain {
         while(iterator.hasNext() && threadsRunning < count) {
             BotProxy proxy = iterator.next();
 
-            SplashChecker thread = new SplashChecker(URL, proxy);
+            SplashChecker thread = new SplashChecker(UUID.randomUUID().toString(), URL, proxy);
             executor.submit(thread);
             threadsRunning++;
         }
 
         while(threadsRunning < count) {
-            SplashChecker thread = new SplashChecker(URL, null);
+            SplashChecker thread = new SplashChecker(UUID.randomUUID().toString(), URL, null);
             executor.submit(thread);
             threadsRunning++;
         }

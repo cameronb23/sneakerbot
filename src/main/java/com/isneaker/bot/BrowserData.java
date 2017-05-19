@@ -1,13 +1,7 @@
 package com.isneaker.bot;
 
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.cookie.Cookie;
 import lombok.Getter;
-
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import org.apache.http.client.CookieStore;
 
 /**
  * Created by student on 5/19/17.
@@ -18,9 +12,9 @@ public class BrowserData {
     private final BotProxy proxy;
 
     @Getter
-    private final List<Cookie> cookies;
+    private final CookieStore cookies;
 
-    public BrowserData(BotProxy proxy, List<Cookie> cookies) {
+    public BrowserData(BotProxy proxy, CookieStore cookies) {
         this.proxy = proxy;
 
         this.cookies = cookies;
