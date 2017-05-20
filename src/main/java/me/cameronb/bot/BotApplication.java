@@ -1,8 +1,13 @@
 package me.cameronb.bot;
 
-import me.cameronb.bot.proxy.BotProxy;
-import me.cameronb.bot.proxy.ProxyLoader;
-import me.cameronb.bot.tasks.adidas.SplashChecker;
+import com.isneaker.bot.proxy.BotProxy;
+import com.isneaker.bot.proxy.ProxyLoader;
+import com.isneaker.bot.tasks.adidas.SplashChecker;
+import com.isneaker.bot.ui.BotUI;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,18 +18,20 @@ import java.util.concurrent.Executors;
 /**
  * Created by Cameron on 2/9/17.
  */
-public class Bot {
-    public final static String URL = "http://adidas.bot.nu/yeezy/";
+public class BotApplication extends Application {
 
 
-    // use config
+    // create our executor
     final static ExecutorService executor = Executors.newFixedThreadPool(Config.INSTANCE.getTaskCount());
 
 
     private static ProxyLoader proxyLoader;
     private static int threadsRunning = 0;
 
+    private BotUI ui;
+
     public static void main(String[] args) {
+
         System.out.println("Loading proxies and tasks");
 
         // chromedriver path
@@ -37,6 +44,18 @@ public class Bot {
             e.printStackTrace();
         }
 
+        // finally, launch our UI.
+        launch(args);
+    }
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        Parent root = FXMLLoader.load(getClass().getResource("/bot.fxml"));
+        this.ui = new BotUI(primaryStage, root);
+    }
+
+
+    public static void startTasks() {
         System.out.println("Starting " + Config.INSTANCE.getTaskCount() + " tasks.");
 
         Iterator<BotProxy> iterator = proxyLoader.getProxiesLoaded().keySet().iterator();
