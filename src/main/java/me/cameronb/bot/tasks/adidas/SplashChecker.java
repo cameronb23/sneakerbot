@@ -1,8 +1,8 @@
-package com.isneaker.bot.tasks.adidas;
+package me.cameronb.bot.tasks.adidas;
 
-import com.isneaker.bot.Config;
-import com.isneaker.bot.browser.BrowserData;
-import com.isneaker.bot.proxy.BotProxy;
+import me.cameronb.bot.Config;
+import me.cameronb.bot.browser.BrowserData;
+import me.cameronb.bot.proxy.BotProxy;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;

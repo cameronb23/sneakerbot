@@ -1,16 +1,9 @@
-package com.isneaker.bot.tasks.adidas;
+package me.cameronb.bot.tasks.adidas;
 
-import com.isneaker.bot.Config;
-import com.isneaker.bot.browser.BotBrowser;
-import com.isneaker.bot.browser.BrowserData;
-import com.machinepublishers.jbrowserdriver.JBrowserDriver;
-import com.machinepublishers.jbrowserdriver.ProxyConfig;
-import com.machinepublishers.jbrowserdriver.Settings;
-import com.machinepublishers.jbrowserdriver.UserAgent;
-import com.sun.javafx.applet.Splash;
+import me.cameronb.bot.Config;
+import me.cameronb.bot.browser.BotBrowser;
+import me.cameronb.bot.browser.BrowserData;
 import org.openqa.selenium.Cookie;
-
-import java.util.logging.Level;
 
 /**
  * Created by Cameron on 5/19/17.

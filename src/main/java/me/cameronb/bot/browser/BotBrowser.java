@@ -1,6 +1,6 @@
-package com.isneaker.bot.browser;
+package me.cameronb.bot.browser;
 
-import com.isneaker.bot.Config;
+import me.cameronb.bot.Config;
 import com.machinepublishers.jbrowserdriver.JBrowserDriver;
 import com.machinepublishers.jbrowserdriver.ProxyConfig;
 import com.machinepublishers.jbrowserdriver.Settings;

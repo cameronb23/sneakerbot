@@ -1,9 +1,8 @@
-package com.isneaker.bot;
+package me.cameronb.bot;
 
-import com.isneaker.bot.proxy.BotProxy;
-import com.isneaker.bot.proxy.ProxyLoader;
-import com.isneaker.bot.tasks.adidas.SplashChecker;
-import com.machinepublishers.jbrowserdriver.UserAgent;
+import me.cameronb.bot.proxy.BotProxy;
+import me.cameronb.bot.proxy.ProxyLoader;
+import me.cameronb.bot.tasks.adidas.SplashChecker;
 
 import java.io.File;
 import java.io.IOException;

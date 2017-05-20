@@ -4,13 +4,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.isneaker</groupId>
+    <groupId>me.cameronb</groupId>
     <artifactId>bot</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1-ALPHA</version>
 
 
     <dependencies>
 
+        <!-- framework to create browser automation -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
@@ -18,13 +19,22 @@
         </dependency>
 
         <dependency>
-            <!-- frameowkr for selenium -->
+            <!-- framework for selenium -->
             <groupId>io.ddavison</groupId>
             <artifactId>conductor</artifactId>
             <version>1.1</version>
         </dependency>
 
         <dependency>
+            <!-- a wrapper for selenium in java -->
+            <groupId>com.machinepublishers</groupId>
+            <artifactId>jbrowserdriver</artifactId>
+            <version>0.17.8</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <!-- a nice addon for creating getters/setters using annotations -->
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.16.16</version>
@@ -32,6 +42,7 @@
         </dependency>
 
         <dependency>
+            <!-- framework for testing our code -->
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
@@ -46,17 +57,10 @@
         </dependency>
 
         <dependency>
+            <!-- very basic but functional http client -->
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.5.3</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <!-- a headless browser for checkout -->
-            <groupId>com.machinepublishers</groupId>
-            <artifactId>jbrowserdriver</artifactId>
-            <version>0.17.8</version>
             <scope>compile</scope>
         </dependency>
 
@@ -80,7 +84,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.isneaker.bot.Bot</mainClass>
+                            <mainClass>me.cameronb.bot.Bot</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

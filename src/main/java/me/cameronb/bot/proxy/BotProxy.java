@@ -1,4 +1,4 @@
-package com.isneaker.bot.proxy;
+package me.cameronb.bot.proxy;
 
 import lombok.Getter;
 

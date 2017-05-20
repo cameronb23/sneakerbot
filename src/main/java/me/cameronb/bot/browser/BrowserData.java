@@ -1,6 +1,6 @@
-package com.isneaker.bot.browser;
+package me.cameronb.bot.browser;
 
-import com.isneaker.bot.proxy.BotProxy;
+import me.cameronb.bot.proxy.BotProxy;
 import lombok.Getter;
 import org.apache.http.client.CookieStore;
 

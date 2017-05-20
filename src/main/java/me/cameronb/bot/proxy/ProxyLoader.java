@@ -1,6 +1,5 @@
-package com.isneaker.bot.proxy;
+package me.cameronb.bot.proxy;
 
-import com.isneaker.bot.proxy.BotProxy;
 import lombok.Getter;
 
 import java.io.BufferedReader;

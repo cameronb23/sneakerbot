@@ -1,4 +1,4 @@
-package com.isneaker.bot;
+package me.cameronb.bot;
 
 import lombok.Getter;
 
