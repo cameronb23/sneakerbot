@@ -19,6 +19,8 @@ public class ProxyLoader {
 
     public ProxyLoader(File f) throws IOException {
 
+        if(!f.exists()) return;
+
         BufferedReader reader = new BufferedReader(new FileReader(f));
 
         String line;

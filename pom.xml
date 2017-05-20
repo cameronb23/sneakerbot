@@ -11,20 +11,6 @@
 
     <dependencies>
 
-        <!-- framework to create browser automation -->
-        <dependency>
-            <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-java</artifactId>
-            <version>3.4.0</version>
-        </dependency>
-
-        <dependency>
-            <!-- framework for selenium -->
-            <groupId>io.ddavison</groupId>
-            <artifactId>conductor</artifactId>
-            <version>1.1</version>
-        </dependency>
-
         <dependency>
             <!-- a wrapper for selenium in java -->
             <groupId>com.machinepublishers</groupId>
@@ -80,25 +66,15 @@
             </plugin>
 
             <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>me.cameronb.bot.Bot</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
-            </plugin>
-
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.0.0</version>
                 <configuration>
-                    <!-- put your configurations here -->
+                    <transformers>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            <mainClass>me.cameronb.bot.Bot</mainClass>
+                        </transformer>
+                    </transformers>
                 </configuration>
                 <executions>
                     <execution>

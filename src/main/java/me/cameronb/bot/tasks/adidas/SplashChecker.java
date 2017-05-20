@@ -95,7 +95,8 @@ public class SplashChecker extends Thread {
                 HttpResponse res = this.client.execute(new HttpGet(Config.INSTANCE.getSplashUrl()));
                 InputStream data = res.getEntity().getContent();
 
-                String result = IOUtils.toString(data, StandardCharsets.UTF_8);
+
+                String result = IOUtils.toString(data, "UTF-8");
 
                 Set<String> foundSelectors = new HashSet<>();
                 boolean contains = false;

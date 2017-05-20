@@ -4,3 +4,4 @@ target/
 /bot.iml
 .DS_Store
 chromedriver
+/dependency-reduced-pom.xml
