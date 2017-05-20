@@ -3,4 +3,4 @@ target/
 /sneakerbot.iml
 /bot.iml
 .DS_Store
-chromedriver 2
+chromedriver

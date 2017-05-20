@@ -80,7 +80,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.isneaker.bot.BotMain</mainClass>
+                            <mainClass>com.isneaker.bot.Bot</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

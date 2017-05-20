@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <mainUrl>http://www.adidas.com/</mainUrl>
+    <splashUrl>http://www.adidas.com/yeezy</splashUrl>
+    <cartUrl>https://www.adidas.com/on/demandware.store/Sites-adidas-US-Site/en_US/Cart-Show</cartUrl>
+    <requestDelay>10000</requestDelay>
+    <taskCount>1</taskCount>
+    <chromeDriverPath>~/Downloads/chromedriver</chromeDriverPath>
+    <useragent>Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36</useragent>
+    <selectors>
+        <selector>data-sitekey=</selector>
+    </selectors>
+</config>
