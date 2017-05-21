@@ -12,13 +12,15 @@ import java.util.logging.Level;
 /**
  * Created by Cameron on 5/19/2017.
  */
-public abstract class BotBrowser {
+public abstract class BotBrowser implements Runnable {
 
     @Getter
-    private final JBrowserDriver driver;
+    private JBrowserDriver driver;
 
     @Getter
     private final BrowserData settings;
+
+    private final ProxyConfig proxy;
 
     public BotBrowser() {
         this(null);
@@ -28,8 +30,6 @@ public abstract class BotBrowser {
         this.settings = settings;
 
         // build the proxy object
-
-        ProxyConfig proxy = null;
 
         if(settings != null && settings.getProxy() != null) {
             if(settings.getProxy().getPassword() != null) {
@@ -45,8 +45,13 @@ public abstract class BotBrowser {
                         settings.getProxy().getAddress(),
                         settings.getProxy().getPort());
             }
+        } else {
+            proxy = null;
         }
+    }
 
+    @Override
+    public void run() {
         // create settings object
         Settings.Builder settingBuilder = Settings.builder()
                 .userAgent(new UserAgent(null, null, null, null, null, Config.INSTANCE.getUseragent()))
@@ -59,8 +64,6 @@ public abstract class BotBrowser {
         if(proxy != null) {
             settingBuilder = settingBuilder.proxy(proxy);
         }
-
-
 
         this.driver = new JBrowserDriver(settingBuilder.build());
 

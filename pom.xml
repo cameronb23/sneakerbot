@@ -12,6 +12,13 @@
     <dependencies>
 
         <dependency>
+            <!-- HEADLESS BROWSER -->
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>htmlunit-driver</artifactId>
+            <version>2.26</version>
+        </dependency>
+
+        <dependency>
             <!-- a wrapper for selenium in java -->
             <groupId>com.machinepublishers</groupId>
             <artifactId>jbrowserdriver</artifactId>
@@ -48,6 +55,21 @@
             <artifactId>httpclient</artifactId>
             <version>4.5.3</version>
             <scope>compile</scope>
+        </dependency>
+
+
+        <dependency>
+            <!-- logging dep -->
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.8.0-alpha2</version>
+        </dependency>
+
+        <dependency>
+            <!-- another -->
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.8.0-alpha2</version>
         </dependency>
 
     </dependencies>

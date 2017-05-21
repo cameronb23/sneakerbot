@@ -2,9 +2,12 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
@@ -13,7 +16,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<GridPane hgap="14.0" maxHeight="+Infinity" maxWidth="+Infinity" minHeight="-Infinity" minWidth="-Infinity" vgap="20.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.isneaker.bot.ui.controllers.AddTaskController">
+<GridPane hgap="14.0" maxHeight="+Infinity" maxWidth="+Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="194.0" prefWidth="538.0" vgap="20.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
   <children>
     <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="TOP">
       <image>
@@ -22,19 +25,40 @@
     </ImageView>
     <VBox maxHeight="+Infinity" maxWidth="+Infinity" minHeight="-Infinity" prefWidth="400.0" spacing="7.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
       <children>
-        <Label fx:id="messageLabel" text="Add Task" textAlignment="LEFT" wrapText="true">
-          <font>
-            <Font name="System Bold" size="13.0" />
-          </font>
-        </Label>
-            <ChoiceBox prefWidth="150.0" />
+            <AnchorPane prefHeight="0.0" prefWidth="436.0">
+               <children>
+              <Label fx:id="messageLabel" text="Add Task" textAlignment="LEFT" wrapText="true">
+                <font>
+                  <Font name="System Bold" size="13.0" />
+                </font>
+              </Label>
+               </children>
+            </AnchorPane>
+            <AnchorPane prefHeight="23.0" prefWidth="436.0">
+               <children>
+                  <ChoiceBox fx:id="typeSelect" prefWidth="150.0" />
+                  <TextField fx:id="instanceCount" layoutX="286.0" prefHeight="25.0" prefWidth="150.0" promptText="Number of instances" AnchorPane.leftAnchor="286.0" />
+                  <CheckBox fx:id="onePass" layoutX="182.0" layoutY="4.0" mnemonicParsing="false" text="One Success" />
+               </children>
+            </AnchorPane>
+            <AnchorPane prefHeight="32.0" prefWidth="436.0">
+               <children>
+                  <TextField fx:id="selectors" prefHeight="25.0" prefWidth="234.0" promptText="Selectors (seperate with comma)" text="data-sitekey=" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="5.0" />
+                  <TextField fx:id="requestDelay" layoutX="286.0" layoutY="6.0" prefHeight="25.0" prefWidth="150.0" promptText="Request delay in seconds" />
+               </children>
+            </AnchorPane>
+            <AnchorPane prefHeight="0.0" prefWidth="436.0">
+               <children>
+                  <TextField fx:id="splashUrl" prefHeight="25.0" prefWidth="436.0" promptText="Splash URL" />
+               </children>
+            </AnchorPane>
       </children>
     </VBox>
     <HBox maxHeight="-Infinity" maxWidth="+Infinity" minHeight="-Infinity" minWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1">
       <children>
         <HBox fx:id="actionParent" alignment="CENTER">
           <children>
-            <Button fx:id="actionButton" mnemonicParsing="false" text="Help" HBox.hgrow="NEVER">
+            <Button fx:id="helpButton" mnemonicParsing="false" text="Help" HBox.hgrow="NEVER">
               <HBox.margin>
                 <Insets right="14.0" />
               </HBox.margin>
@@ -45,7 +69,7 @@
           </HBox.margin>
         </HBox>
         <Pane maxWidth="+Infinity" HBox.hgrow="ALWAYS" />
-        <Button fx:id="cancelButton" cancelButton="true" minWidth="80.0" mnemonicParsing="false" text="Cancel" HBox.hgrow="NEVER">
+        <Button fx:id="cancelButton" cancelButton="true" minWidth="80.0" mnemonicParsing="false" onAction="#close" text="Cancel" HBox.hgrow="NEVER">
           <HBox.margin>
             <Insets />
           </HBox.margin>

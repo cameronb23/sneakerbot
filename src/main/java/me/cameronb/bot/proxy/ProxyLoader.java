@@ -41,6 +41,15 @@ public class ProxyLoader {
 
     }
 
+    public BotProxy getNext() {
+        for(Map.Entry<BotProxy, Boolean> entry : proxiesLoaded.entrySet()) {
+            if(!entry.getValue())
+                return entry.getKey();
+        }
+
+        return null;
+    }
+
     public void markUsed(BotProxy p) {
         this.proxiesLoaded.put(p, true);
     }
