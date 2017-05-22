@@ -37,19 +37,19 @@
             <AnchorPane prefHeight="23.0" prefWidth="436.0">
                <children>
                   <ChoiceBox fx:id="typeSelect" prefWidth="150.0" />
-                  <TextField fx:id="instanceCount" layoutX="286.0" prefHeight="25.0" prefWidth="150.0" promptText="Number of instances" AnchorPane.leftAnchor="286.0" />
+                  <TextField fx:id="instanceCount" layoutX="286.0" prefHeight="25.0" prefWidth="150.0" promptText="Number of instances" text="50" AnchorPane.leftAnchor="286.0" />
                   <CheckBox fx:id="onePass" layoutX="182.0" layoutY="4.0" mnemonicParsing="false" text="One Success" />
                </children>
             </AnchorPane>
             <AnchorPane prefHeight="32.0" prefWidth="436.0">
                <children>
-                  <TextField fx:id="selectors" prefHeight="25.0" prefWidth="234.0" promptText="Selectors (seperate with comma)" text="data-sitekey=" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="5.0" />
-                  <TextField fx:id="requestDelay" layoutX="286.0" layoutY="6.0" prefHeight="25.0" prefWidth="150.0" promptText="Request delay in seconds" />
+                  <TextField fx:id="selectors" prefHeight="25.0" prefWidth="234.0" promptText="Selectors (seperate with comma)" text="[data-sitekey],div.g-recaptcha" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="5.0" />
+                  <TextField fx:id="requestDelay" layoutX="286.0" layoutY="6.0" prefHeight="25.0" prefWidth="150.0" promptText="Request delay in seconds" text="5" />
                </children>
             </AnchorPane>
             <AnchorPane prefHeight="0.0" prefWidth="436.0">
                <children>
-                  <TextField fx:id="splashUrl" prefHeight="25.0" prefWidth="436.0" promptText="Splash URL" />
+                  <TextField fx:id="splashUrl" prefHeight="25.0" prefWidth="436.0" promptText="Splash URL" text="http://adidas.bot.nu/yeezy/" />
                </children>
             </AnchorPane>
       </children>

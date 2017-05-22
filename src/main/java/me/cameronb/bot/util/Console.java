@@ -4,6 +4,8 @@ import javafx.scene.control.TextArea;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by Cameron on 5/20/2017.
@@ -13,6 +15,7 @@ import java.io.OutputStream;
 public class Console extends OutputStream {
 
     private TextArea output;
+    private ExecutorService executorService;
 
     public Console(TextArea target) {
         this.output = target;

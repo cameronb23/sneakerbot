@@ -76,7 +76,7 @@
                                     <Insets left="5.0" top="9.0" />
                                  </HBox.margin>
                               </Button>
-                              <Button fx:id="stopTasksButton" mnemonicParsing="false" onAction="#stopTasks" prefHeight="25.0" prefWidth="116.0" text="Stop">
+                              <Button fx:id="stopTasksButton" disable="true" mnemonicParsing="false" onAction="#stopTasks" prefHeight="25.0" prefWidth="116.0" text="Stop">
                                  <HBox.margin>
                                     <Insets top="9.0" />
                                  </HBox.margin>

@@ -5,10 +5,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.layout.BackgroundFill;
 import lombok.Getter;
 import me.cameronb.bot.task.Task;
@@ -39,6 +36,11 @@ public class Controller implements Initializable {
     private ListView<Task> taskListView;
 
     @FXML
+    private Button startTasksButton;
+    @FXML
+    private Button stopTasksButton;
+
+    @FXML
     public void openTaskCreation() {
         new AddTaskController();
     }
@@ -62,6 +64,8 @@ public class Controller implements Initializable {
         boolean success = BotApplication.getInstance().startTasks();
         if(success) {
             rightStatus.setText("Running");
+            startTasksButton.setDisable(true);
+            stopTasksButton.setDisable(false);
         }
     }
 
@@ -69,6 +73,8 @@ public class Controller implements Initializable {
     public void stopTasks() {
         BotApplication.getInstance().stopTasks();
         rightStatus.setText("Idle");
+        startTasksButton.setDisable(false);
+        stopTasksButton.setDisable(true);
     }
 
     @Override
@@ -78,10 +84,13 @@ public class Controller implements Initializable {
 
         consoleOutput.setWrapText(true);
 
-        Console console = new Console(consoleOutput);
-        PrintStream stream = new PrintStream(console, true);
-        System.setOut(stream);
-        System.setErr(stream);
+        /*Thread thread = new Thread(() -> {
+            Console console = new Console(consoleOutput);
+            PrintStream stream = new PrintStream(console, true);
+            System.setOut(stream);
+            System.setErr(stream);
+        }, "CONSOLE-THREAD");
+        thread.start();*/
 
         rightStatus.setText("Idle");
 

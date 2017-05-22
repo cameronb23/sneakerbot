@@ -1,26 +1,22 @@
 package me.cameronb.bot.task.adidas;
 
 import com.gargoylesoftware.htmlunit.DefaultCredentialsProvider;
+import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.machinepublishers.jbrowserdriver.JBrowserDriver;
 import com.machinepublishers.jbrowserdriver.ProxyConfig;
 import com.machinepublishers.jbrowserdriver.Settings;
-import com.machinepublishers.jbrowserdriver.UserAgent;
-import me.cameronb.bot.Config;
-import me.cameronb.bot.browser.BotBrowser;
-import me.cameronb.bot.browser.BrowserData;
+import lombok.Getter;
+import lombok.Setter;
 import me.cameronb.bot.proxy.BotProxy;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Cookie;
-import org.openqa.selenium.Proxy;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
+import java.util.Set;
 import java.util.logging.Level;
 
 /**
@@ -31,6 +27,7 @@ public class SplashChecker implements Runnable {
     private final BotProxy proxy;
     private final SplashTask owner;
     private final HtmlUnitDriver driver;
+    private JBrowserDriver checkout;
     private final int id;
 
     private HtmlUnitDriver createDriver() {
@@ -50,7 +47,7 @@ public class SplashChecker implements Runnable {
     public SplashChecker(BotProxy proxy, SplashTask owner, int id) {
         this.proxy = proxy;
         this.owner = owner;
-        this.id = id;
+        this.id = id + 1;
 
         if(proxy != null) {
             driver = createDriver();
@@ -62,10 +59,17 @@ public class SplashChecker implements Runnable {
         }
     }
 
+    public void stop() {
+        done = true;
+        driver.close();
+        if(checkout != null) checkout.close();
+    }
+
 
 
     private ProxyConfig configureProxy() {
         ProxyConfig p;
+        if(proxy == null) return null;
         if(proxy.getPassword() != null) {
             p = new ProxyConfig(
                     ProxyConfig.Type.HTTP,
@@ -99,42 +103,82 @@ public class SplashChecker implements Runnable {
         return settingBuilder.build();
     }
 
+    @Getter @Setter
+    private boolean done = false;
+
 
     @Override
     public void run() {
-        System.out.println(String.format("(%) WAITING ON SPLASH", id));
-        driver.get(owner.getUrl());
-
-
-        while(driver.findElement(By.className("sk-fading-circle")).isDisplayed()) {
-            try {
-                Thread.sleep(owner.getDelay());
-            } catch(InterruptedException ex) {
-                ex.printStackTrace();
-            }
+        try {
+            Thread.sleep(1000 * id); // wait 1 second for each additional browser to prevent spam
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
-        System.out.println(String.format("(%d) PASSED SPLASH.", id));
+        driver.get(owner.getUrl());
+        driver.navigate().refresh();
 
-        boolean found = false;
+        System.out.println(String.format("(%d) WAITING ON SPLASH", id));
 
-        while(!found) {
-            for(String s : owner.getSelectors()) {
-                if(driver.findElement(By.cssSelector(s)) != null) {
-                    found = true;
+        String found = null;
+
+        while(found == null) {
+            if (done) break;
+            for (String s : owner.getSelectors()) {
+                WebElement element = null;
+                if (done) break;
+                try {
+                    element = driver.findElementByCssSelector(s);
+                } catch (NoSuchElementException | ElementNotFoundException ex) {
+                    continue;
+                }
+
+                if (element != null) {
+                    if (element.isDisplayed()) {
+                        found = s;
+                    }
                 }
             }
         }
 
+        System.out.println(String.format("(%d) PASSED SPLASH [%s]", id, found));
+        if(done) {
+            System.out.println("DONE");
+            return;
+        }
+
+        System.out.println("ORIGINAL: " + driver.manage().getCookies().size());
+
+
+
         ProxyConfig proxyConfig = configureProxy();
 
-        WebDriver checkout = new JBrowserDriver(build(proxyConfig));
+        checkout = new JBrowserDriver(build(proxyConfig));
 
-        for(Cookie c : driver.manage().getCookies()) {
+        checkout.get("adidas.bot.nu/");
+
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        Set<Cookie> cookieSet = driver.manage().getCookies();
+
+        System.out.println("OLD:" + cookieSet);
+
+        for(Cookie c : cookieSet) {
             checkout.manage().addCookie(c);
         }
 
-        checkout.get(owner.getUrl());
+        System.out.println("NEW:" + checkout.manage().getCookies());
+
+        checkout.get(driver.getCurrentUrl());
+
+        if(owner.isOnePass()) {
+            done = true;
+            owner.end();
+        }
     }
 
 }

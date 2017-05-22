@@ -31,7 +31,7 @@ public class SplashTask extends Task {
     public SplashTask(String url, long requestDelay, int instances, String[] selectors, boolean onePass) {
         super("Adidas Splash", url);
         this.url = url;
-        this.delay = requestDelay;
+        this.delay = requestDelay * 1000; // 1000 is one second
         this.instanceCount = instances;
         this.selectors = selectors;
         this.onePass = onePass;
@@ -40,10 +40,15 @@ public class SplashTask extends Task {
     @Override
     public void start() {
         setRunning(true);
-        //executor = Executors.newWorkStealingPool(128);
-        //executor = new ThreadPool(instanceCount);
+        //executor = Executors.newWorkStealingPool(instanceCount * 2);
         executor = Executors.newFixedThreadPool(instanceCount * 2);
-        //executor = new ThreadPoolExecutor(1, 128, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<>(100));
+        /*executor = new ThreadPoolExecutor(
+                1,
+                instanceCount * 2,
+                30,
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(100)
+        );*/
 
         for(int i = 0; i < instanceCount; i++) {
             // create new instance
@@ -52,23 +57,38 @@ public class SplashTask extends Task {
             SplashChecker instance;
 
             if(proxy != null) {
-                instance = new SplashChecker(proxy, this, i + 1);
+                instance = new SplashChecker(proxy, this, i);
 
                 BotApplication.getInstance().getProxyLoader().markUsed(proxy);
             } else {
-                instance = new SplashChecker(null, this, i + 1);
+                instance = new SplashChecker(null, this, i);
             }
 
             instances.add(instance);
         }
 
-        for(SplashChecker instance : instances) {
-            executor.submit(instance);
+        System.out.println(instances.size());
+
+        Iterator<SplashChecker> iter = instances.iterator();
+
+        while(iter.hasNext()) {
+            SplashChecker checker = iter.next();
+
+            // TODO: DOES NOT SEEM TO SUBMIT TASKS TO EXECUTOR
+            executor.execute(checker);
         }
     }
 
     @Override
     public void end() {
+        System.out.println("SHUTTING DOWN TASKS");
+
+        for(SplashChecker c : instances) {
+            c.stop();
+        }
+
+        instances.clear();
+
         executor.shutdownNow();
         executor = null;
         setRunning(false);
