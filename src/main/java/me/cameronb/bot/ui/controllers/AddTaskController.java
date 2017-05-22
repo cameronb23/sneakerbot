@@ -85,7 +85,7 @@ public class AddTaskController implements Initializable {
                 ));
                 close();
             }
-            /*case "adidas request": {
+            case "adidas request": {
                 BotApplication.getInstance().addTask(new RequestTask(
                         splashUrl.getText(),
                         Long.parseLong(requestDelay.getText()),
@@ -94,7 +94,7 @@ public class AddTaskController implements Initializable {
                         onePass.isSelected()
                 ));
                 close();
-            }*/
+            }
             default:
                 return;
         }
@@ -104,6 +104,6 @@ public class AddTaskController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         // initialize task types
         typeSelect.getItems().add("Adidas Splash");
-        //typeSelect.getItems().add("Adidas Request");
+        typeSelect.getItems().add("Adidas Request");
     }
 }

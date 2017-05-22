@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by Cameron on 5/20/2017.
@@ -20,6 +21,7 @@ public class RequestTask extends Task {
     @Getter private int instanceCount;
     @Getter private String[] selectors;
     @Getter private boolean onePass;
+    @Getter private AtomicBoolean isDone = new AtomicBoolean(false);
 
     private final Set<RequestChecker> instances = new HashSet<>();
 
@@ -75,11 +77,11 @@ public class RequestTask extends Task {
 
     @Override
     public void end() {
+        this.getIsDone().set(true);
         Iterator<RequestChecker> iter = instances.iterator();
 
         while(iter.hasNext()) {
             RequestChecker instance = iter.next();
-            instance.stop();
             iter.remove();
         }
 
