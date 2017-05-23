@@ -1,23 +1,26 @@
-package me.cameronb.bot.tasks.adidas;
+package me.cameronb.bot.task.adidas;
 
-import me.cameronb.bot.Config;
 import me.cameronb.bot.browser.BotBrowser;
 import me.cameronb.bot.browser.BrowserData;
+import me.cameronb.bot.task.Task;
 import org.openqa.selenium.Cookie;
 
 /**
  * Created by Cameron on 5/19/17.
  */
-public class SplashBrowser extends BotBrowser {
+public class AdidasBrowser extends BotBrowser {
 
-    public SplashBrowser(BrowserData data) {
+    private Task owner;
+
+    public AdidasBrowser(Task owner, BrowserData data) {
         super(data);
+        this.owner = owner;
     }
 
     @Override
     public void open() {
         // go to splash page (passed)
-        getDriver().get(Config.INSTANCE.getSplashUrl());
+        getDriver().get(owner.getUrl());
 
         // set cookies and refresh
         for(int i = 0; i < getSettings().getCookies().getCookies().size(); i++) {
