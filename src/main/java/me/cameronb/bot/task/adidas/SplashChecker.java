@@ -1,8 +1,7 @@
 package me.cameronb.bot.task.adidas;
 
-import com.gargoylesoftware.htmlunit.DefaultCredentialsProvider;
-import com.gargoylesoftware.htmlunit.ElementNotFoundException;
-import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.*;
+import com.gargoylesoftware.htmlunit.util.*;
 import com.machinepublishers.jbrowserdriver.JBrowserDriver;
 import com.machinepublishers.jbrowserdriver.ProxyConfig;
 import com.machinepublishers.jbrowserdriver.Settings;
@@ -14,8 +13,12 @@ import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.openqa.selenium.*;
+import org.openqa.selenium.Cookie;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
+import java.io.IOException;
 import java.util.Set;
 import java.util.logging.Level;
 
@@ -44,10 +47,18 @@ public class SplashChecker implements Runnable {
         };
     }
 
+    /*private JBrowserDriver createDriver() {
+        ProxyConfig proxyConfig = configureProxy();
+
+        return new JBrowserDriver(build(proxyConfig));
+    }*/
+
     public SplashChecker(BotProxy proxy, SplashTask owner, int id) {
         this.proxy = proxy;
         this.owner = owner;
         this.id = id + 1;
+
+
 
         if(proxy != null) {
             driver = createDriver();
@@ -109,75 +120,61 @@ public class SplashChecker implements Runnable {
 
     @Override
     public void run() {
-        try {
-            Thread.sleep(1000 * id); // wait 1 second for each additional browser to prevent spam
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        while(!owner.getIsDone().get()) {
+            try {
+                Thread.sleep(1000 * id); // wait 1 second for each additional browser to prevent spam
+            } catch (InterruptedException e) {}
 
-        driver.get(owner.getUrl());
-        driver.navigate().refresh();
+            driver.navigate().to(owner.getUrl());
 
-        System.out.println(String.format("(%d) WAITING ON SPLASH", id));
+            System.out.println(String.format("(%d) WAITING ON SPLASH", id));
 
-        String found = null;
+            String found = null;
 
-        while(found == null) {
-            if (done) break;
-            for (String s : owner.getSelectors()) {
-                WebElement element = null;
-                if (done) break;
-                try {
-                    element = driver.findElementByCssSelector(s);
-                } catch (NoSuchElementException | ElementNotFoundException ex) {
-                    continue;
-                }
-
-                if (element != null) {
-                    if (element.isDisplayed()) {
-                        found = s;
+            while(found == null) {
+                for (String s : owner.getSelectors()) {
+                    try {
+                        if(driver.findElementByCssSelector(s) != null) {
+                            found = s;
+                        }
+                    } catch (NoSuchElementException e) {
+                    } catch(NoSuchWindowException e) {
+                        break;
                     }
                 }
             }
-        }
 
-        System.out.println(String.format("(%d) PASSED SPLASH [%s]", id, found));
-        if(done) {
-            System.out.println("DONE");
-            return;
-        }
-
-        System.out.println("ORIGINAL: " + driver.manage().getCookies().size());
+            System.out.println(String.format("(%d) PASSED SPLASH [%s]", id, found));
 
 
+            System.out.println("LAST PAGE: " + driver.getCurrentUrl());
+            System.out.println("ORIGINAL: " + driver.manage().getCookies());
 
-        ProxyConfig proxyConfig = configureProxy();
+            ProxyConfig proxyConfig = configureProxy();
 
-        checkout = new JBrowserDriver(build(proxyConfig));
+            checkout = new JBrowserDriver(build(proxyConfig));
 
-        checkout.get("adidas.bot.nu/");
+            checkout.navigate().to(driver.getCurrentUrl());
 
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {}
 
-        Set<Cookie> cookieSet = driver.manage().getCookies();
+            Set<Cookie> cookieSet = driver.manage().getCookies();
 
-        System.out.println("OLD:" + cookieSet);
+            System.out.println("OLD:" + cookieSet);
 
-        for(Cookie c : cookieSet) {
-            checkout.manage().addCookie(c);
-        }
+            for(Cookie c : cookieSet) {
+                checkout.manage().addCookie(c);
+            }
 
-        System.out.println("NEW:" + checkout.manage().getCookies());
+            System.out.println("NEW:" + checkout.manage().getCookies());
 
-        checkout.get(driver.getCurrentUrl());
+            checkout.get(driver.getCurrentUrl());
 
-        if(owner.isOnePass()) {
-            done = true;
-            owner.end();
+            if(owner.isOnePass()) {
+                owner.getIsDone().set(true);
+            }
         }
     }
 

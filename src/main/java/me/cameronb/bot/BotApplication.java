@@ -42,6 +42,7 @@ public class BotApplication extends Application {
 
         // chromedriver path
         System.setProperty("webdriver.chrome.driver", Config.INSTANCE.getChromeDriverPath());
+        System.setProperty("webdriver.gecko.driver", Config.INSTANCE.getFirefoxDriverPath());
 
         // finally, launch our UI.
         launch(args);

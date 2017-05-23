@@ -13,13 +13,16 @@ import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.client.ProxyAuthenticationStrategy;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
 
@@ -81,24 +84,20 @@ public class RequestChecker implements Callable<Boolean> {
 
 
         try {
-            System.out.println("HELLO FROM " + Thread.currentThread().getName());
             Thread.sleep(1000 * id);
-            while(!done) {
+            while(!done && !owner.getIsDone().get()) {
+                System.out.println(String.format("(%d) REQUESTING SPLASH", id));
                 new RequestRunnable().run();
                 Thread.sleep(owner.getDelay() * 1000);
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            System.out.println("INTERRUPTED");
+            return false;
         }
 
-        System.out.println("Instance started.");
+        System.out.println("FINISHED");
+
         return true;
-    }
-
-
-    public void stop() {
-        done = true;
-        System.out.println("Instance stopped");
     }
 
     private class RequestRunnable implements Runnable {
@@ -124,7 +123,12 @@ public class RequestChecker implements Callable<Boolean> {
                         }
                     }
 
-                    System.out.println("Got response");
+                    for(Cookie c : cookieStore.getCookies()) {
+                        if(c.getName().contains("hmac") || c.getValue().contains("hmac"))
+                            contains = true;
+                    }
+
+                    System.out.println(String.format("(%d) GOT RESPONSE", id));
 
                     if(contains) {
                         if(owner.isOnePass()) {
@@ -141,8 +145,10 @@ public class RequestChecker implements Callable<Boolean> {
 
                         done = true;
                     }
-                } catch(Exception ex) {
-                    System.out.println("err");
+                } catch(IOException ex) {
+                    ex.printStackTrace();
+                } catch(Exception e) {
+                    e.printStackTrace();
                 }
             }
         }

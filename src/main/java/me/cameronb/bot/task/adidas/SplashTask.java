@@ -1,6 +1,7 @@
 package me.cameronb.bot.task.adidas;
 
 import lombok.Getter;
+import lombok.Setter;
 import me.cameronb.bot.BotApplication;
 import me.cameronb.bot.proxy.BotProxy;
 import me.cameronb.bot.task.Task;
@@ -10,6 +11,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by Cameron on 5/20/2017.
@@ -25,6 +27,8 @@ public class SplashTask extends Task {
     private final Set<SplashChecker> instances = new HashSet<>();
 
     @Getter private ExecutorService executor;
+
+    @Getter private AtomicBoolean isDone = new AtomicBoolean(false);
 
     //@Getter private ThreadPool executor;
 

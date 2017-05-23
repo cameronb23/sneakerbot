@@ -16,7 +16,17 @@
             <version>3.4.0</version>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
+            <!-- jsoup HTML parser library @ http://jsoup.org/ -->
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.10.2</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+
             <!-- HEADLESS BROWSER -->
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>htmlunit-driver</artifactId>
