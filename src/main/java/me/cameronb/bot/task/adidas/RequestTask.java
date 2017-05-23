@@ -77,6 +77,7 @@ public class RequestTask extends Task {
 
     @Override
     public void end() {
+        this.getIsDone().set(true);
         Iterator<RequestChecker> iter = instances.iterator();
 
         this.isDone.set(true);
