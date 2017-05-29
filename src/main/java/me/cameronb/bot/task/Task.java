@@ -6,7 +6,7 @@ import lombok.Setter;
 /**
  * Created by Cameron on 5/20/2017.
  */
-public abstract class Task {
+public abstract class Task implements Runnable {
 
     @Getter
     private final String title;
@@ -30,7 +30,7 @@ public abstract class Task {
     /**
      * Starts the task.
      */
-    public abstract void start();
+    //public abstract void start();
 
     /**
      * Ends this task(stopping it)

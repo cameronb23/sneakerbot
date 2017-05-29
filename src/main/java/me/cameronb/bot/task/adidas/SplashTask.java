@@ -42,7 +42,7 @@ public class SplashTask extends Task {
     }
 
     @Override
-    public void start() {
+    public void run() {
         setRunning(true);
         //executor = Executors.newWorkStealingPool(instanceCount * 2);
         executor = Executors.newFixedThreadPool(instanceCount * 2);

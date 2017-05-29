@@ -1,12 +1,12 @@
 package me.cameronb.bot.browser;
 
+import com.machinepublishers.jbrowserdriver.*;
 import me.cameronb.bot.Config;
-import com.machinepublishers.jbrowserdriver.JBrowserDriver;
-import com.machinepublishers.jbrowserdriver.ProxyConfig;
-import com.machinepublishers.jbrowserdriver.Settings;
-import com.machinepublishers.jbrowserdriver.UserAgent;
 import lombok.Getter;
+import org.apache.http.Header;
+import org.apache.http.HeaderElement;
 
+import java.util.LinkedHashMap;
 import java.util.logging.Level;
 
 /**
@@ -20,14 +20,18 @@ public abstract class BotBrowser implements Runnable {
     @Getter
     private final BrowserData settings;
 
+    @Getter
+    private final Header[] headers;
+
     private final ProxyConfig proxy;
 
     public BotBrowser() {
         this(null);
     }
 
-    public BotBrowser(BrowserData settings) {
+    public BotBrowser(BrowserData settings, Header... headers) {
         this.settings = settings;
+        this.headers = headers;
 
         // build the proxy object
 
@@ -52,6 +56,16 @@ public abstract class BotBrowser implements Runnable {
 
     @Override
     public void run() {
+        LinkedHashMap<String, String> httpHeaders = new LinkedHashMap<>();
+        LinkedHashMap<String, String> httpsHeaders = new LinkedHashMap<>();
+
+        for(Header h : headers) {
+            System.out.println(h.getName() + ":" + h.getValue());
+            for(HeaderElement e : h.getElements()) {
+                System.out.println("--" + e.getName() + ":" + e.getValue() + " / " + e.getParameters().toString());
+            }
+        }
+
         // create settings object
         Settings.Builder settingBuilder = Settings.builder()
                 .userAgent(new UserAgent(null, null, null, null, null, Config.INSTANCE.getUseragent()))
