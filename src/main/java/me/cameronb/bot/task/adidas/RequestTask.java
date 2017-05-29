@@ -25,8 +25,8 @@ public class RequestTask extends Task {
 
     private final Set<RequestChecker> instances = new HashSet<>();
 
-    //@Getter private ExecutorService executor;
-    @Getter private ScheduledExecutorService executor;
+    @Getter private ExecutorService executor;
+    //@Getter private ScheduledExecutorService executor;
 
     //@Getter private ThreadPool executor;
 
@@ -43,9 +43,9 @@ public class RequestTask extends Task {
     public void run() {
         //executor = Executors.newWorkStealingPool(128);
         //executor = new ThreadPool(instanceCount * 3);
-        // 111executor = Executors.newFixedThreadPool(128);
+        executor = Executors.newFixedThreadPool(128);
         //executor = new ThreadPoolExecutor(1, 128, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<>(100));
-        executor = new ScheduledThreadPoolExecutor(128);
+        //executor = new ScheduledThreadPoolExecutor(128);
 
         for(int i = 0; i < instanceCount; i++) {
             // create new instance
@@ -70,7 +70,10 @@ public class RequestTask extends Task {
             }
 
             instances.add(instance);
-            executor.scheduleAtFixedRate(instance, i, delay, TimeUnit.SECONDS);
+            //executor.scheduleAtFixedRate(instance, i, delay, TimeUnit.SECONDS);
+        }
+        for(RequestChecker instance : instances) {
+            executor.submit(instance);
         }
 
         for(;;) {
@@ -79,9 +82,7 @@ public class RequestTask extends Task {
             }
         }
 
-        /*for(RequestChecker instance : instances) {
-            executor.submit(instance);
-        }*/
+
     }
 
     @Override

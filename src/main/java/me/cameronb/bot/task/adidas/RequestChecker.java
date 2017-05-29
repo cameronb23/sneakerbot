@@ -11,7 +11,9 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.*;
 import org.apache.http.protocol.HttpContext;
@@ -29,7 +31,7 @@ public class RequestChecker implements Runnable {
     private final int id;
     private final BotProxy proxy;
     private final CookieStore cookieStore;
-    private HttpClient client;
+    private CloseableHttpClient client;
     private AdidasBrowser browser;
     private final RequestTask owner;
     private Timer timer;
@@ -66,8 +68,6 @@ public class RequestChecker implements Runnable {
              builder = HttpClients.custom()
                     .setUserAgent(Config.INSTANCE.getUseragent())
                     .setDefaultCookieStore(this.cookieStore);
-
-
         }
 
         builder.setRedirectStrategy(new LaxRedirectStrategy());
@@ -81,10 +81,12 @@ public class RequestChecker implements Runnable {
             try {
                 System.out.println(String.format("(%d) Sending request", id));
                 // submit request to splash page
-                HttpResponse res = client.execute(new HttpGet(owner.getUrl()));
+                HttpClientContext context = HttpClientContext.create();
+                context.setCookieStore(cookieStore);
+                CloseableHttpResponse res = client.execute(new HttpGet(owner.getUrl()), context);
                 InputStream data = res.getEntity().getContent();
 
-                System.out.println(cookieStore.getCookies());
+                System.out.println(context.getCookieStore());
 
 
                 Set<String> foundSelectors = new HashSet<>();
@@ -126,9 +128,16 @@ public class RequestChecker implements Runnable {
                     );
 
                     data.close();
+                    res.close();
+                } else {
+                    res.close();
+                    Thread.sleep(owner.getDelay() * 1000);
+                    if(!owner.getIsDone().get()) {
+                        run();
+                    }
                 }
             } catch(Exception ex) {
-                System.out.println("err");
+                return;
             }
         }
     }
