@@ -11,6 +11,8 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -30,11 +32,10 @@ public class RequestChecker implements Runnable {
 
     private final int id;
     private final BotProxy proxy;
-    private final CookieStore cookieStore;
+    private BasicCookieStore cookieStore;
     private CloseableHttpClient client;
     private AdidasBrowser browser;
     private final RequestTask owner;
-    private Timer timer;
 
 
     // SAVE COOKIES / SESSION DATA
@@ -46,6 +47,8 @@ public class RequestChecker implements Runnable {
         this.cookieStore = new BasicCookieStore();
 
         HttpClientBuilder builder;
+
+        RequestConfig globalConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build();
 
         if(this.proxy != null) {
             CredentialsProvider creds = new BasicCredentialsProvider();
@@ -70,6 +73,7 @@ public class RequestChecker implements Runnable {
                     .setDefaultCookieStore(this.cookieStore);
         }
 
+        builder.setDefaultRequestConfig(globalConfig);
         builder.setRedirectStrategy(new LaxRedirectStrategy());
 
         this.client = builder.build();
@@ -81,12 +85,12 @@ public class RequestChecker implements Runnable {
             try {
                 System.out.println(String.format("(%d) Sending request", id));
                 // submit request to splash page
-                HttpClientContext context = HttpClientContext.create();
-                context.setCookieStore(cookieStore);
-                CloseableHttpResponse res = client.execute(new HttpGet(owner.getUrl()), context);
+                /*HttpClientContext context = HttpClientContext.create();
+                context.setCookieStore(cookieStore);*/
+                CloseableHttpResponse res = client.execute(new HttpGet(owner.getUrl()));
                 InputStream data = res.getEntity().getContent();
 
-                System.out.println(context.getCookieStore());
+                System.out.println(cookieStore.toString());
 
 
                 Set<String> foundSelectors = new HashSet<>();

@@ -6,7 +6,7 @@
     <requestDelay>10000</requestDelay>
     <taskCount>1</taskCount>
     <chromeDriverPath>~/Downloads/chromedriver</chromeDriverPath>
-    <useragent>Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36</useragent>
+    <useragent>Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3095.0 Safari/537.36</useragent>
     <selectors>
         <selector>data-sitekey=</selector>
     </selectors>
