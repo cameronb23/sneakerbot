@@ -62,7 +62,9 @@ public class BotApplication extends Application {
         System.out.println("Starting " + tasks.size() + " tasks.");
 
         for(Task task : tasks) {
-            task.start();
+            new Thread(() -> {
+                task.run();
+            }).start();
             controller.updateTasks();
         }
 

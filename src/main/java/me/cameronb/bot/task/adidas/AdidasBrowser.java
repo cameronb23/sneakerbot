@@ -3,6 +3,7 @@ package me.cameronb.bot.task.adidas;
 import me.cameronb.bot.browser.BotBrowser;
 import me.cameronb.bot.browser.BrowserData;
 import me.cameronb.bot.task.Task;
+import org.apache.http.Header;
 import org.openqa.selenium.Cookie;
 
 /**
@@ -12,8 +13,8 @@ public class AdidasBrowser extends BotBrowser {
 
     private Task owner;
 
-    public AdidasBrowser(Task owner, BrowserData data) {
-        super(data);
+    public AdidasBrowser(Task owner, BrowserData data, Header... headers) {
+        super(data, headers);
         this.owner = owner;
     }
 
