@@ -56,7 +56,7 @@ public abstract class BotBrowser implements Runnable {
 
     @Override
     public void run() {
-        LinkedHashMap<String, String> httpHeaders = new LinkedHashMap<>();
+        /*LinkedHashMap<String, String> httpHeaders = new LinkedHashMap<>();
         LinkedHashMap<String, String> httpsHeaders = new LinkedHashMap<>();
 
         for(Header h : headers) {
@@ -64,7 +64,7 @@ public abstract class BotBrowser implements Runnable {
             for(HeaderElement e : h.getElements()) {
                 System.out.println("--" + e.getName() + ":" + e.getValue() + " / " + e.getParameters().toString());
             }
-        }
+        }*/
 
         // create settings object
         Settings.Builder settingBuilder = Settings.builder()
@@ -79,9 +79,8 @@ public abstract class BotBrowser implements Runnable {
             settingBuilder = settingBuilder.proxy(proxy);
         }
 
+        System.out.println("Starting new browser proc");
         this.driver = new JBrowserDriver(settingBuilder.build());
-
-        this.open();
     }
 
     abstract public void open();

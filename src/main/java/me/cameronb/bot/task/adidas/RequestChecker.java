@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by Cameron on 2/9/17.
@@ -79,18 +80,23 @@ public class RequestChecker implements Runnable {
         this.client = builder.build();
     }
 
+    private AtomicBoolean firstRun = new AtomicBoolean(true);
+
     @Override
     public void run() {
         synchronized (this) {
             try {
+                if(firstRun.get()) {
+                    firstRun.set(false);
+                    Thread.sleep(1000 * this.id);
+                }
+
                 System.out.println(String.format("(%d) Sending request", id));
                 // submit request to splash page
                 /*HttpClientContext context = HttpClientContext.create();
                 context.setCookieStore(cookieStore);*/
                 CloseableHttpResponse res = client.execute(new HttpGet(owner.getUrl()));
                 InputStream data = res.getEntity().getContent();
-
-                System.out.println(cookieStore.toString());
 
 
                 Set<String> foundSelectors = new HashSet<>();
@@ -105,16 +111,14 @@ public class RequestChecker implements Runnable {
                 }
 
                 for(Cookie c : cookieStore.getCookies()) {
-                    if(c.getName().toLowerCase().contains("dwsid") ||
-                            c.getValue().toLowerCase().contains("dwsid")) {
+                    if(c.getName().toLowerCase().contains("gceeqs") ||
+                            c.getValue().toLowerCase().contains("hmac")) {
                         foundSelectors.add("dwsid");
                         contains = true;
                     }
                 }
 
                 if(contains) {
-                    System.out.println("passed splash");
-
                     if(owner.isOnePass()) {
                         owner.getIsDone().set(true);
                     }
@@ -123,13 +127,13 @@ public class RequestChecker implements Runnable {
 
                     System.out.println("Wait for browser to reload cart page with cookies.");
 
-                    for(Header h : res.getAllHeaders()) {
+                    /*for(Header h : res.getAllHeaders()) {
                         System.out.println(h.getName() + ":" + h.getValue());
-                    }
+                    }*/
 
-                    owner.getExecutor().submit(
-                            new AdidasBrowser(owner, new BrowserData(proxy, cookieStore), res.getAllHeaders())
-                    );
+                    this.browser = new AdidasBrowser(owner, new BrowserData(proxy, cookieStore), res.getAllHeaders());
+                    this.browser.run();
+                    this.browser.open();
 
                     data.close();
                     res.close();
@@ -142,76 +146,6 @@ public class RequestChecker implements Runnable {
                 }
             } catch(Exception ex) {
                 return;
-            }
-        }
-    }
-
-    private void makeRequests() {
-        while(!owner.getIsDone().get()) {
-            System.out.println(String.format("(%d) sending another", id));
-            new RequestRunnable().run();
-            try {
-                Thread.sleep(owner.getDelay() * 1000);
-            } catch (InterruptedException e) {}
-        }
-
-    }
-
-    private class RequestRunnable extends TimerTask implements Runnable {
-
-        @Override
-        public void run() {
-            synchronized (this) {
-                try {
-                    System.out.println("sending");
-                    // submit request to splash page
-                    HttpResponse res = client.execute(new HttpGet(owner.getUrl()));
-                    InputStream data = res.getEntity().getContent();
-
-                    System.out.println(cookieStore.getCookies());
-
-
-                    Set<String> foundSelectors = new HashSet<>();
-                    boolean contains = false;
-                     /*String result = IOUtils.toString(data, "UTF-8");
-
-                        for(String s : owner.getSelectors()) {
-                            if(result.contains(s)) {
-                                foundSelectors.add(s);
-                                contains = true;
-                            }
-                        }*/
-
-                    for(Cookie c : cookieStore.getCookies()) {
-                        if(c.getName().toLowerCase().contains("dwsid") ||
-                                c.getValue().toLowerCase().contains("dwsid")) {
-                            foundSelectors.add("dwsid");
-                            contains = true;
-                        }
-                    }
-
-                    if(contains) {
-                        System.out.println("passed splash");
-
-                        if(owner.isOnePass()) {
-                            owner.getIsDone().set(true);
-                        }
-
-                        System.out.println("Browser(" + id + ") passed splash(" + foundSelectors.toString() + ")");
-
-                        System.out.println("Wait for browser to reload cart page with cookies.");
-
-                        for(Header h : res.getAllHeaders()) {
-                            System.out.println(h.getName() + ":" + h.getValue());
-                        }
-
-                        owner.getExecutor().submit(
-                                new AdidasBrowser(owner, new BrowserData(proxy, cookieStore), res.getAllHeaders())
-                        );
-                    }
-                } catch(Exception ex) {
-                    System.out.println("err");
-                }
             }
         }
     }
