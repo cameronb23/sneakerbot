@@ -84,13 +84,13 @@ public class Controller implements Initializable {
 
         consoleOutput.setWrapText(true);
 
-        /*Thread thread = new Thread(() -> {
+        Thread consoleThread = new Thread(() -> {
             Console console = new Console(consoleOutput);
             PrintStream stream = new PrintStream(console, true);
             System.setOut(stream);
             System.setErr(stream);
         }, "CONSOLE-THREAD");
-        thread.start();*/
+        consoleThread.start();
 
         rightStatus.setText("Idle");
 

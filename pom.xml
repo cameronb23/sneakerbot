@@ -6,7 +6,7 @@
 
     <groupId>me.cameronb</groupId>
     <artifactId>bot</artifactId>
-    <version>0.1-ALPHA</version>
+    <version>0.2-ALPHA</version>
 
 
     <dependencies>
