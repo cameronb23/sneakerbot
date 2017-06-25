@@ -4,26 +4,24 @@ import me.cameronb.bot.Config;
 import me.cameronb.bot.browser.BrowserData;
 import me.cameronb.bot.proxy.BotProxy;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.*;
+import org.apache.http.Header;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.*;
-import org.apache.http.protocol.HttpContext;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TimerTask;
 
 /**
  * Created by Cameron on 2/9/17.
@@ -46,7 +44,7 @@ public class RequestChecker implements Runnable {
 
         this.cookieStore = new BasicCookieStore();
 
-        HttpClientBuilder builder;
+        HttpClientBuilder builder = HttpClientBuilder.create();
 
         RequestConfig globalConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build();
 
@@ -59,25 +57,24 @@ public class RequestChecker implements Runnable {
 
             HttpHost proxy = new HttpHost(this.proxy.getAddress(), this.proxy.getPort());
 
-            builder = HttpClients.custom()
-                    .setUserAgent(Config.INSTANCE.getUseragent())
+            builder
                     .setProxy(proxy)
                     .setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy())
-                    .setDefaultCredentialsProvider(creds)
-                    .setDefaultCookieStore(this.cookieStore);
+                    .setDefaultCredentialsProvider(creds);
 
 
-        } else {
-             builder = HttpClients.custom()
-                    .setUserAgent(Config.INSTANCE.getUseragent())
-                    .setDefaultCookieStore(this.cookieStore);
         }
 
-        builder.setDefaultRequestConfig(globalConfig);
-        builder.setRedirectStrategy(new LaxRedirectStrategy());
+        // global configuration
+        builder.setUserAgent(Config.INSTANCE.getUseragent())
+                .setDefaultRequestConfig(globalConfig)
+                .setDefaultCookieStore(this.cookieStore)
+                .setRedirectStrategy(new LaxRedirectStrategy());
 
         this.client = builder.build();
     }
+
+    private volatile boolean firstRun = true;
 
     @Override
     public void run() {
@@ -87,10 +84,16 @@ public class RequestChecker implements Runnable {
                 // submit request to splash page
                 /*HttpClientContext context = HttpClientContext.create();
                 context.setCookieStore(cookieStore);*/
+                if(firstRun) {
+                    CloseableHttpResponse initialRes = client.execute(new HttpGet(owner.getUrl()));
+                    initialRes.close();
+                    firstRun = false;
+                }
+
                 CloseableHttpResponse res = client.execute(new HttpGet(owner.getUrl()));
                 InputStream data = res.getEntity().getContent();
 
-                System.out.println(cookieStore.toString());
+                System.out.println("COOKIE LIST: " + cookieStore.toString());
 
 
                 Set<String> foundSelectors = new HashSet<>();
@@ -100,14 +103,6 @@ public class RequestChecker implements Runnable {
                 for(String s : owner.getSelectors()) {
                     if(result.contains(s)) {
                         foundSelectors.add(s);
-                        contains = true;
-                    }
-                }
-
-                for(Cookie c : cookieStore.getCookies()) {
-                    if(c.getName().toLowerCase().contains("dwsid") ||
-                            c.getValue().toLowerCase().contains("dwsid")) {
-                        foundSelectors.add("dwsid");
                         contains = true;
                     }
                 }
@@ -134,9 +129,13 @@ public class RequestChecker implements Runnable {
                     data.close();
                     res.close();
                 } else {
+                    data.close();
                     res.close();
                     Thread.sleep(owner.getDelay() * 1000);
-                    if(!owner.getIsDone().get()) {
+                    if(owner.getIsDone().get()) {
+                        client.close();
+                        return;
+                    } else {
                         run();
                     }
                 }

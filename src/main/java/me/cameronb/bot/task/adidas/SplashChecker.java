@@ -117,21 +117,26 @@ public class SplashChecker implements Runnable {
     @Getter @Setter
     private boolean done = false;
 
+    private boolean firstRun = true;
 
     @Override
     public void run() {
+        if(firstRun) {
+            System.out.println(String.format("(%d) Starting process...", id));
+            driver.navigate().to(owner.getUrl());
+            firstRun = false;
+        }
         while(!owner.getIsDone().get()) {
             try {
-                Thread.sleep(1000 * id); // wait 1 second for each additional browser to prevent spam
+                Thread.sleep(5000); // wait 1 second for each additional browser to prevent spam
             } catch (InterruptedException e) {}
-
-            driver.navigate().to(owner.getUrl());
 
             System.out.println(String.format("(%d) WAITING ON SPLASH", id));
 
             String found = null;
 
             while(found == null) {
+                if(owner.getIsDone().get()) break;
                 for (String s : owner.getSelectors()) {
                     try {
                         if(driver.findElementByCssSelector(s) != null) {

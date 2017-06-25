@@ -19,8 +19,8 @@ import java.util.List;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Config {
 
-    private static final JAXBContext CONTEXT;
-    public static final Config INSTANCE;
+    public static JAXBContext CONTEXT;
+    public static Config INSTANCE;
 
     // define configuration properties and default values
     @Getter
@@ -48,26 +48,17 @@ public class Config {
     @Getter
     private String useragent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36";
 
+    @Getter
+    private boolean onePass = false;
+
+    @Getter
+    private String proxies = "~/proxies.txt";
 
     @Getter @XmlElementWrapper @XmlElement(name = "selector")
-    private List<String> selectors = new ArrayList<>(Arrays.asList("data-sitekey="));
+    private List<String> selectors = new ArrayList<>(Arrays.asList("[data-sitekey]"));
 
     // so it doesn't get initialized
     Config() {}
-
-    static {
-        try {
-            CONTEXT = JAXBContext.newInstance(Config.class);
-        } catch (JAXBException ex) {
-            throw new IllegalStateException("JAXB context for " + Config.class + " unavailable.", ex);
-        }
-        File applicationConfigFile = new File(System.getProperty("config", new File(System.getProperty("user.dir"), "config.xml").toString()));
-        if (applicationConfigFile.exists()) {
-            INSTANCE = loadConfig(applicationConfigFile);
-        } else {
-            INSTANCE = new Config();
-        }
-    }
 
     public static Config loadConfig(File file) {
         try {

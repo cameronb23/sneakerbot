@@ -1,11 +1,9 @@
 package me.cameronb.bot.task.adidas;
 
 import lombok.Getter;
-import lombok.Setter;
 import me.cameronb.bot.BotApplication;
 import me.cameronb.bot.proxy.BotProxy;
 import me.cameronb.bot.task.Task;
-import me.cameronb.bot.thread.ThreadPool;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -45,7 +43,7 @@ public class SplashTask extends Task {
     public void run() {
         setRunning(true);
         //executor = Executors.newWorkStealingPool(instanceCount * 2);
-        executor = Executors.newFixedThreadPool(instanceCount * 2);
+        executor = Executors.newFixedThreadPool(instanceCount);
         /*executor = new ThreadPoolExecutor(
                 1,
                 instanceCount * 2,
@@ -56,14 +54,14 @@ public class SplashTask extends Task {
 
         for(int i = 0; i < instanceCount; i++) {
             // create new instance
-            BotProxy proxy = BotApplication.getInstance().getProxyLoader().getNext();
+            BotProxy proxy = BotApplication.getProxyLoader().getNext();
 
             SplashChecker instance;
 
             if(proxy != null) {
                 instance = new SplashChecker(proxy, this, i);
 
-                BotApplication.getInstance().getProxyLoader().markUsed(proxy);
+                BotApplication.getProxyLoader().markUsed(proxy);
             } else {
                 instance = new SplashChecker(null, this, i);
             }
@@ -71,30 +69,44 @@ public class SplashTask extends Task {
             instances.add(instance);
         }
 
-        System.out.println(instances.size());
+        for(SplashChecker instance : instances) {
+            new Thread(instance).start();
+            //executor.submit(instance);
+        }
 
-        Iterator<SplashChecker> iter = instances.iterator();
-
-        while(iter.hasNext()) {
-            SplashChecker checker = iter.next();
-
-            // TODO: DOES NOT SEEM TO SUBMIT TASKS TO EXECUTOR
-            executor.execute(checker);
+        for(;;) {
+            if(isDone.get()) {
+                return;
+            }
         }
     }
 
     @Override
     public void end() {
-        System.out.println("SHUTTING DOWN TASKS");
+        this.getIsDone().set(true);
+        Iterator<SplashChecker> iter = instances.iterator();
 
-        for(SplashChecker c : instances) {
-            c.stop();
+        this.isDone.set(true);
+
+        while(iter.hasNext()) {
+            SplashChecker instance = iter.next();
+            iter.remove();
         }
 
-        instances.clear();
-
-        executor.shutdownNow();
-        executor = null;
-        setRunning(false);
+        if(executor != null) {
+            try {
+                System.out.println("attempt to shutdown executor");
+                executor.shutdown();
+                executor.awaitTermination(5, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                System.err.println("tasks interrupted");
+            } finally {
+                if (!executor.isTerminated()) {
+                    System.err.println("cancel non-finished tasks");
+                }
+                executor.shutdownNow();
+                System.out.println("shutdown finished");
+            }
+        }
     }
 }

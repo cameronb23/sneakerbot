@@ -3,11 +3,13 @@
     <mainUrl>http://www.adidas.com/</mainUrl>
     <splashUrl>http://www.adidas.com/yeezy</splashUrl>
     <cartUrl>https://www.adidas.com/on/demandware.store/Sites-adidas-US-Site/en_US/Cart-Show</cartUrl>
-    <requestDelay>10000</requestDelay>
-    <taskCount>1</taskCount>
+    <requestDelay>5000</requestDelay>
+    <taskCount>50</taskCount>
     <chromeDriverPath>~/Downloads/chromedriver</chromeDriverPath>
     <useragent>Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3095.0 Safari/537.36</useragent>
     <selectors>
-        <selector>data-sitekey=</selector>
+        <selector>[data-sitekey]</selector>
     </selectors>
+    <onePass>false</onePass>
+    <proxies>~/proxies.txt</proxies>
 </config>

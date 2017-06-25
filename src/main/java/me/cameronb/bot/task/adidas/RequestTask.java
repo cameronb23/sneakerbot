@@ -49,7 +49,7 @@ public class RequestTask extends Task {
 
         for(int i = 0; i < instanceCount; i++) {
             // create new instance
-            BotProxy proxy = BotApplication.getInstance().getProxyLoader().getNext();
+            BotProxy proxy = BotApplication.getProxyLoader().getNext();
 
             RequestChecker instance;
 
@@ -60,7 +60,7 @@ public class RequestTask extends Task {
                         this
                 );
 
-                BotApplication.getInstance().getProxyLoader().markUsed(proxy);
+                BotApplication.getProxyLoader().markUsed(proxy);
             } else {
                 instance = new RequestChecker(
                         i + 1,

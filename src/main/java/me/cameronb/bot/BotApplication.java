@@ -9,7 +9,12 @@ import lombok.Getter;
 import lombok.Setter;
 import me.cameronb.bot.proxy.ProxyLoader;
 import me.cameronb.bot.task.Task;
+import me.cameronb.bot.task.adidas.SplashChecker;
+import me.cameronb.bot.task.adidas.SplashTask;
+import org.apache.log4j.PropertyConfigurator;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
@@ -20,7 +25,7 @@ import java.util.concurrent.Executors;
 /**
  * Created by Cameron on 2/9/17.
  */
-public class BotApplication extends Application {
+public class BotApplication {
 
     private static BotApplication instance;
 
@@ -30,92 +35,66 @@ public class BotApplication extends Application {
 
 
     @Getter
-    private ProxyLoader proxyLoader;
-
-    @Getter @Setter
-    private Controller controller;
+    private static ProxyLoader proxyLoader;
 
     @Getter
-    private Set<Task> tasks = new HashSet<>();
+    private static Set<Task> tasks = new HashSet<>();
 
     public static void main(String[] args) {
+
+        //PropertyConfigurator.configure(System.getProperty("user.dir") + "/src/main/resources/log4j.properties");
+
+        if(args.length < 1) {
+            System.err.println("You must provide a config file!");
+            System.exit(0);
+        }
+
+        String configFile = args[0];
+
+        try {
+            Config.CONTEXT = JAXBContext.newInstance(Config.class);
+        } catch (JAXBException ex) {
+            throw new IllegalStateException("JAXB context for " + Config.class + " unavailable.", ex);
+        }
+        File applicationConfigFile = new File(configFile);
+        if (applicationConfigFile.exists()) {
+            Config.INSTANCE = Config.loadConfig(applicationConfigFile);
+        } else {
+            Config.INSTANCE = new Config();
+        }
 
         // chromedriver path
         System.setProperty("webdriver.chrome.driver", Config.INSTANCE.getChromeDriverPath());
         System.setProperty("webdriver.gecko.driver", Config.INSTANCE.getFirefoxDriverPath());
 
-        // finally, launch our UI.
-        launch(args);
-
-    }
-
-    public static BotApplication getInstance() {
-        return instance;
-    }
-
-    public boolean startTasks() {
-        if(tasks.size() < 1) {
-            System.out.println("No tasks added!");
-            return false;
-        }
-
-        System.out.println("Starting " + tasks.size() + " tasks.");
-
-        for(Task task : tasks) {
-            new Thread(() -> {
-                task.run();
-            }).start();
-            controller.updateTasks();
-        }
-
-        System.out.println("Tasks started.");
-        return true;
-    }
-
-    public void stopTasks() {
-        for(Task t : tasks) {
-            t.end();
-            controller.updateTasks();
-        }
-
-        System.out.println("All tasks stopped");
-    }
-
-    public void addTask(Task t) {
-        this.tasks.add(t);
-        controller.addTask(t);
-
-        System.out.println("New size: " + this.tasks.size());
-    }
-
-    public void removeTask(Task t) {
-        this.tasks.remove(t);
-        controller.removeTask(t);
-
-        System.out.println("New size: " + this.tasks.size());
-    }
-
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-        instance = this;
-
-        Parent root = FXMLLoader.load(getClass().getResource("/bot.fxml"));
-
-        primaryStage.setTitle("NabeelForce v1");
-
-        Scene scene = new Scene(root);
-        primaryStage.setScene(scene);
-        primaryStage.show();
-
         System.out.println("Loading proxies");
 
         try {
-            proxyLoader = new ProxyLoader(new File(System.getProperty("user.dir") + "/proxies.txt"));
+            proxyLoader = new ProxyLoader(new File(Config.INSTANCE.getProxies()));
             System.out.println("Loaded all proxies.");
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Error loading proxies.");
         }
+
+        tasks.add(new SplashTask(
+                Config.INSTANCE.getSplashUrl(),
+                Config.INSTANCE.getRequestDelay(),
+                Config.INSTANCE.getTaskCount(),
+                Config.INSTANCE.getSelectors().toArray(new String[]{}),
+                Config.INSTANCE.isOnePass()
+        ));
+        startTasks();
+    }
+
+    private static void startTasks() {
+        for(Task t : tasks) {
+            new Thread(() -> t.run()).start();
+        }
+    }
+
+    public static BotApplication getInstance() {
+        return instance;
     }
 
 }
