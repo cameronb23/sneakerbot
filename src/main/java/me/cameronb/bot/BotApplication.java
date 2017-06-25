@@ -25,14 +25,17 @@ import java.util.concurrent.Executors;
 /**
  * Created by Cameron on 2/9/17.
  */
-public class BotApplication {
+public class BotApplication extends Application {
 
+    @Getter
     private static BotApplication instance;
 
     // create our executor
     @Getter
     private final ExecutorService executor = Executors.newFixedThreadPool(1);
 
+    @Getter @Setter
+    private Controller controller;
 
     @Getter
     private static ProxyLoader proxyLoader;
@@ -56,7 +59,7 @@ public class BotApplication {
         } catch (JAXBException ex) {
             throw new IllegalStateException("JAXB context for " + Config.class + " unavailable.", ex);
         }
-        File applicationConfigFile = new File(configFile);
+        File applicationConfigFile = new File(System.getProperty("user.dir") + "/config.xml");
         if (applicationConfigFile.exists()) {
             Config.INSTANCE = Config.loadConfig(applicationConfigFile);
         } else {
@@ -70,12 +73,14 @@ public class BotApplication {
         System.out.println("Loading proxies");
 
         try {
-            proxyLoader = new ProxyLoader(new File(Config.INSTANCE.getProxies()));
+            proxyLoader = new ProxyLoader(new File(System.getProperty("user.dir") + "/proxies.txt"));
             System.out.println("Loaded all proxies.");
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Error loading proxies.");
         }
+
+        launch(args);
 
         tasks.add(new SplashTask(
                 Config.INSTANCE.getSplashUrl(),
@@ -85,6 +90,19 @@ public class BotApplication {
                 Config.INSTANCE.isOnePass()
         ));
         startTasks();
+    }
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        instance = this;
+
+        Parent root = FXMLLoader.load(getClass().getResource("/application.fxml"));
+
+        primaryStage.setTitle("NabeelForce v1");
+
+        Scene scene = new Scene(root);
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 
     private static void startTasks() {

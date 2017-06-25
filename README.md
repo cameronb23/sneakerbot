@@ -35,6 +35,10 @@ A configured starting command would look like this:
 java -Xms1024M -Xmx4096M -jar sneakerbot.jar config.xml
 ```
 
+## Compiling
+For compilation, we use Excelsior JET to compile to machine code. We use the Maven plugin to execute these tasks,
+and compiling is as simple as using the `jet:build` goal when running maven.
+
 ### Proxies
 
 Proxies are set up in the `proxies.txt` file. Currently, only user/pass and proxies without authentication are supported.

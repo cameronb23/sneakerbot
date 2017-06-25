@@ -2,6 +2,7 @@ package me.cameronb.bot.task;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.cameronb.bot.proxy.BotProxy;
 
 /**
  * Created by Cameron on 5/20/2017.

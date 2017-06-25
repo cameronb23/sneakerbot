@@ -59,11 +59,11 @@ public class SplashTask extends Task {
             SplashChecker instance;
 
             if(proxy != null) {
-                instance = new SplashChecker(proxy, this, i);
+                instance = new SplashChecker(i, proxy, this);
 
                 BotApplication.getProxyLoader().markUsed(proxy);
             } else {
-                instance = new SplashChecker(null, this, i);
+                instance = new SplashChecker(i, null, this);
             }
 
             instances.add(instance);

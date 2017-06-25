@@ -87,6 +87,12 @@
             <version>1.2.17</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>LATEST</version>
+        </dependency>
+
     </dependencies>
 
 
@@ -103,24 +109,21 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.0.0</version>
+                <groupId>com.excelsiorjet</groupId>
+                <artifactId>excelsior-jet-maven-plugin</artifactId>
+                <version>1.0.0</version>
                 <configuration>
-                    <transformers>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>me.cameronb.bot.BotApplication</mainClass>
-                        </transformer>
-                    </transformers>
+                    <mainClass>me.cameronb.bot.BotApplication</mainClass>
+                    <jetHome>C:\jet11.3-eval-amd64</jetHome>
+                    <jvmArgs>
+                        <jvmArg>./config.xml</jvmArg>
+                    </jvmArgs>
+                    <trialVersion>
+                        <expireInDays>30</expireInDays>
+                        <expireMessage>Your free trial has expired! Please DM me on twitter @cgalt23.</expireMessage>
+                    </trialVersion>
+
                 </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

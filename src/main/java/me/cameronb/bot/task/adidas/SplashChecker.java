@@ -8,6 +8,7 @@ import com.machinepublishers.jbrowserdriver.Settings;
 import lombok.Getter;
 import lombok.Setter;
 import me.cameronb.bot.proxy.BotProxy;
+import me.cameronb.bot.task.TaskInstance;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -25,13 +26,12 @@ import java.util.logging.Level;
 /**
  * Created by Cameron on 5/21/2017.
  */
-public class SplashChecker implements Runnable {
+public class SplashChecker extends TaskInstance {
 
     private final BotProxy proxy;
     private final SplashTask owner;
     private final HtmlUnitDriver driver;
     private JBrowserDriver checkout;
-    private final int id;
 
     private HtmlUnitDriver createDriver() {
         return new HtmlUnitDriver() {
@@ -53,10 +53,10 @@ public class SplashChecker implements Runnable {
         return new JBrowserDriver(build(proxyConfig));
     }*/
 
-    public SplashChecker(BotProxy proxy, SplashTask owner, int id) {
+    public SplashChecker(int id, BotProxy proxy, SplashTask owner) {
+        super(id, proxy);
         this.proxy = proxy;
         this.owner = owner;
-        this.id = id + 1;
 
 
 
@@ -122,7 +122,7 @@ public class SplashChecker implements Runnable {
     @Override
     public void run() {
         if(firstRun) {
-            System.out.println(String.format("(%d) Starting process...", id));
+            System.out.println(String.format("(%d) Starting process...", this.getId()));
             driver.navigate().to(owner.getUrl());
             firstRun = false;
         }
@@ -131,7 +131,7 @@ public class SplashChecker implements Runnable {
                 Thread.sleep(5000); // wait 1 second for each additional browser to prevent spam
             } catch (InterruptedException e) {}
 
-            System.out.println(String.format("(%d) WAITING ON SPLASH", id));
+            System.out.println(String.format("(%d) WAITING ON SPLASH", this.getId()));
 
             String found = null;
 
@@ -149,7 +149,7 @@ public class SplashChecker implements Runnable {
                 }
             }
 
-            System.out.println(String.format("(%d) PASSED SPLASH [%s]", id, found));
+            System.out.println(String.format("(%d) PASSED SPLASH [%s]", this.getId(), found));
 
 
             System.out.println("LAST PAGE: " + driver.getCurrentUrl());
