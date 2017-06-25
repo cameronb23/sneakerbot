@@ -20,8 +20,9 @@ public class AdidasBrowser extends BotBrowser {
 
     @Override
     public void open() {
+        System.out.println("Navigating to splash");
         // go to splash page (passed)
-        getDriver().get(owner.getUrl());
+        //getDriver().get(owner.getUrl());
 
         // set cookies and refresh
         for(int i = 0; i < getSettings().getCookies().getCookies().size(); i++) {
@@ -33,7 +34,7 @@ public class AdidasBrowser extends BotBrowser {
         }
 
         // refresh page
-        getDriver().navigate().refresh();
+        getDriver().get(owner.getUrl());
         System.out.println("Browser opened with status " + getDriver().getStatusCode());
     }
 
