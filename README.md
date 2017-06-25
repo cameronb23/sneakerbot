@@ -15,6 +15,26 @@
 - run
 - etc
 
+## Running
+To run this, you need a few things. First, you'll need a copy of the `config.xml`, and the jar itself. Once you have those,
+put them somewhere and execute this command (modify to your use case)
+
+```bash
+java -Xms[INIT]M -Xmx[MAX]M -jar [jar] [config_file]
+```
+
+You can modify this command to suit your needs according to this list of values:
+- **INIT**: This is your starting heap size. Just replace the this with the number of MB you want to allocate.
+- **MAX**: This is the _max_ heap size. Do the same as the starting heap size.
+- **jar**: The location of your JAR file (including extension).
+- **config_file**: The location of your bot configuration.
+
+A configured starting command would look like this:
+
+```bash
+java -Xms1024M -Xmx4096M -jar sneakerbot.jar config.xml
+```
+
 ### Proxies
 
 Proxies are set up in the `proxies.txt` file. Currently, only user/pass and proxies without authentication are supported.
@@ -37,15 +57,15 @@ An example configuration is as follows:
     <mainUrl>http://www.adidas.com/</mainUrl>
     <splashUrl>http://www.adidas.com/yeezy</splashUrl>
     <cartUrl>https://www.adidas.com/on/demandware.store/Sites-adidas-US-Site/en_US/Cart-Show</cartUrl>
-    <requestDelay>10000</requestDelay>
-    <taskCount>1</taskCount>
+    <requestDelay>5000</requestDelay>
+    <taskCount>50</taskCount>
     <chromeDriverPath>~/Downloads/chromedriver</chromeDriverPath>
-    <useragent>
-        Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36
-    </useragent>
+    <useragent>Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3095.0 Safari/537.36</useragent>
     <selectors>
-        <selector>data-sitekey=</selector>
+        <selector>[data-sitekey]</selector>
     </selectors>
+    <onePass>false</onePass>
+    <proxies>~/proxies.txt</proxies>
 </config>
 ```
 #### Configuration options:
@@ -57,3 +77,5 @@ An example configuration is as follows:
 - **chromeDriverPath**: The location of your chromedriver file
 - **useragent**: The useragent string to use for requests
 - **selectors**: A list of HTML selectors to look for to verify that we passed splash.
+- **onePass**: Whether you want the bot to stop tasks after one instance passes splash _[true/false]_
+- **proxies**: The path to your proxies file _including_ file extension.
