@@ -18,6 +18,9 @@ public abstract class Task implements Runnable {
     @Getter @Setter
     private boolean running;
 
+    @Getter
+    private boolean success = false;
+
     @Override
     public String toString() {
         return title;

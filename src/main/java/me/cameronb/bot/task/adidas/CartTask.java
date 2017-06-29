@@ -40,7 +40,11 @@ public class CartTask extends Task {
     private BasicCookieStore cookieStore;
     private CloseableHttpClient client;
 
-    public CartTask(BotProxy proxyConfig, BasicCookieStore cookies) {
+    public CartTask(int threadCount) {
+        super("Adidas Product Mode", Config.INSTANCE.getCartUrl());
+    }
+
+    /*public CartTask(BotProxy proxyConfig, BasicCookieStore cookies) {
         super("Adidas ATC", Config.INSTANCE.getCartUrl());
 
         this.cookieStore = cookies;
@@ -75,7 +79,7 @@ public class CartTask extends Task {
                 .setRedirectStrategy(new LaxRedirectStrategy());
 
         this.client = builder.build();
-    }
+    }*/
 
 
     @Override

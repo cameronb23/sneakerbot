@@ -1,6 +1,8 @@
 package me.cameronb.bot;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -15,8 +17,10 @@ import org.apache.log4j.PropertyConfigurator;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -41,18 +45,20 @@ public class BotApplication extends Application {
     private static ProxyLoader proxyLoader;
 
     @Getter
-    private static Set<Task> tasks = new HashSet<>();
+    private ObservableList<Task> tasks = FXCollections.observableArrayList();
 
     public static void main(String[] args) {
 
         //PropertyConfigurator.configure(System.getProperty("user.dir") + "/src/main/resources/log4j.properties");
 
-        if(args.length < 1) {
-            System.err.println("You must provide a config file!");
-            System.exit(0);
-        }
 
-        String configFile = args[0];
+
+//        if(args.length < 1) {
+//            System.err.println("You must provide a config file!");
+//            System.exit(0);
+//        }
+//
+//        String configFile = args[0];
 
         try {
             Config.CONTEXT = JAXBContext.newInstance(Config.class);
@@ -82,14 +88,14 @@ public class BotApplication extends Application {
 
         launch(args);
 
-        tasks.add(new SplashTask(
-                Config.INSTANCE.getSplashUrl(),
-                Config.INSTANCE.getRequestDelay(),
-                Config.INSTANCE.getTaskCount(),
-                Config.INSTANCE.getSelectors().toArray(new String[]{}),
-                Config.INSTANCE.isOnePass()
-        ));
-        startTasks();
+//        tasks.add(new SplashTask(
+//                Config.INSTANCE.getSplashUrl(),
+//                Config.INSTANCE.getRequestDelay(),
+//                Config.INSTANCE.getTaskCount(),
+//                Config.INSTANCE.getSelectors().toArray(new String[]{}),
+//                Config.INSTANCE.isOnePass()
+//        ));
+//        startTasks();
     }
 
     @Override
@@ -98,17 +104,15 @@ public class BotApplication extends Application {
 
         Parent root = FXMLLoader.load(getClass().getResource("/application.fxml"));
 
-        primaryStage.setTitle("NabeelForce v1");
+        primaryStage.setTitle("Adislayer v0.1");
 
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
-    private static void startTasks() {
-        for(Task t : tasks) {
-            new Thread(() -> t.run()).start();
-        }
+    public void startTask(Task t) {
+        new Thread(() -> t.run()).start();
     }
 
     public static BotApplication getInstance() {

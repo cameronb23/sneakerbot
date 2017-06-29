@@ -2,6 +2,7 @@ package me.cameronb.bot.task.adidas;
 
 import lombok.Getter;
 import me.cameronb.bot.BotApplication;
+import me.cameronb.bot.Config;
 import me.cameronb.bot.proxy.BotProxy;
 import me.cameronb.bot.task.Task;
 
@@ -30,13 +31,12 @@ public class RequestTask extends Task {
 
     //@Getter private ThreadPool executor;
 
-    public RequestTask(String url, long requestDelay, int instances, String[] selectors, boolean onePass) {
-        super("Adidas Request", url);
-        this.url = url;
-        this.delay = requestDelay;
-        this.instanceCount = instances;
-        this.selectors = selectors;
-        this.onePass = onePass;
+    public RequestTask(int instanceCount) {
+        super("Adidas Request", Config.INSTANCE.getSplashUrl());
+        this.delay = Config.INSTANCE.getRequestDelay() * 1000;
+        this.instanceCount = instanceCount;
+        this.selectors = Config.INSTANCE.getSelectors().toArray(new String[]{});
+        this.onePass = Config.INSTANCE.isOnePass();
     }
 
     @Override

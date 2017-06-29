@@ -2,6 +2,7 @@ package me.cameronb.bot.task.adidas;
 
 import lombok.Getter;
 import me.cameronb.bot.BotApplication;
+import me.cameronb.bot.Config;
 import me.cameronb.bot.proxy.BotProxy;
 import me.cameronb.bot.task.Task;
 
@@ -16,7 +17,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class SplashTask extends Task {
 
-    @Getter private String url;
     @Getter private long delay;
     @Getter private int instanceCount;
     @Getter private String[] selectors;
@@ -30,13 +30,12 @@ public class SplashTask extends Task {
 
     //@Getter private ThreadPool executor;
 
-    public SplashTask(String url, long requestDelay, int instances, String[] selectors, boolean onePass) {
-        super("Adidas Splash", url);
-        this.url = url;
-        this.delay = requestDelay * 1000; // 1000 is one second
+    public SplashTask(int instances) {
+        super("Adidas Splash", Config.INSTANCE.getSplashUrl());
+        this.delay = Config.INSTANCE.getRequestDelay() * 1000; // 1000 is one second
         this.instanceCount = instances;
-        this.selectors = selectors;
-        this.onePass = onePass;
+        this.selectors = Config.INSTANCE.getSelectors().toArray(new String[]{});
+        this.onePass = Config.INSTANCE.isOnePass();
     }
 
     @Override
