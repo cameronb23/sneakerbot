@@ -1,13 +1,16 @@
 package me.cameronb.bot.task;
 
+import javafx.collections.ObservableList;
 import lombok.Getter;
 import lombok.Setter;
 import me.cameronb.bot.proxy.BotProxy;
 
+import java.util.Set;
+
 /**
  * Created by Cameron on 5/20/2017.
  */
-public abstract class Task implements Runnable {
+public abstract class Task<T extends TaskInstance> implements Runnable {
 
     @Getter
     private final String title;
@@ -17,9 +20,6 @@ public abstract class Task implements Runnable {
 
     @Getter @Setter
     private boolean running;
-
-    @Getter
-    private boolean success = false;
 
     @Override
     public String toString() {
@@ -41,4 +41,5 @@ public abstract class Task implements Runnable {
      */
     public abstract void end();
 
+    public abstract ObservableList<T> getInstances();
 }

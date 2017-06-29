@@ -1,6 +1,7 @@
 package me.cameronb.bot.task;
 
 import lombok.Getter;
+import lombok.Setter;
 import me.cameronb.bot.proxy.BotProxy;
 
 /**
@@ -13,6 +14,12 @@ public abstract class TaskInstance implements Runnable {
 
     @Getter
     private BotProxy proxy;
+
+    @Getter @Setter
+    private boolean success = false;
+
+    @Getter @Setter
+    private String status;
 
     public TaskInstance(int id, BotProxy proxyConfig) {
         this.id = id;

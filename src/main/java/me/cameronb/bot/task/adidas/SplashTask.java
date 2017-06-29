@@ -1,5 +1,7 @@
 package me.cameronb.bot.task.adidas;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import lombok.Getter;
 import me.cameronb.bot.BotApplication;
 import me.cameronb.bot.Config;
@@ -15,14 +17,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Created by Cameron on 5/20/2017.
  */
-public class SplashTask extends Task {
+public class SplashTask extends Task<SplashChecker> {
 
     @Getter private long delay;
     @Getter private int instanceCount;
     @Getter private String[] selectors;
     @Getter private boolean onePass;
 
-    private final Set<SplashChecker> instances = new HashSet<>();
+    private final ObservableList<SplashChecker> instances = FXCollections.observableArrayList();
 
     @Getter private ExecutorService executor;
 
@@ -30,26 +32,12 @@ public class SplashTask extends Task {
 
     //@Getter private ThreadPool executor;
 
-    public SplashTask(int instances) {
+    public SplashTask(int instanceCount) {
         super("Adidas Splash", Config.INSTANCE.getSplashUrl());
         this.delay = Config.INSTANCE.getRequestDelay() * 1000; // 1000 is one second
-        this.instanceCount = instances;
+        this.instanceCount = instanceCount;
         this.selectors = Config.INSTANCE.getSelectors().toArray(new String[]{});
         this.onePass = Config.INSTANCE.isOnePass();
-    }
-
-    @Override
-    public void run() {
-        setRunning(true);
-        //executor = Executors.newWorkStealingPool(instanceCount * 2);
-        executor = Executors.newFixedThreadPool(instanceCount);
-        /*executor = new ThreadPoolExecutor(
-                1,
-                instanceCount * 2,
-                30,
-                TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(100)
-        );*/
 
         for(int i = 0; i < instanceCount; i++) {
             // create new instance
@@ -67,6 +55,25 @@ public class SplashTask extends Task {
 
             instances.add(instance);
         }
+    }
+
+    @Override
+    public ObservableList<SplashChecker> getInstances() {
+        return instances;
+    }
+
+    @Override
+    public void run() {
+        setRunning(true);
+        //executor = Executors.newWorkStealingPool(instanceCount * 2);
+        executor = Executors.newFixedThreadPool(instanceCount);
+        /*executor = new ThreadPoolExecutor(
+                1,
+                instanceCount * 2,
+                30,
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(100)
+        );*/
 
         for(SplashChecker instance : instances) {
             new Thread(instance).start();

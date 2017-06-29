@@ -1,9 +1,12 @@
 package me.cameronb.bot.task.adidas;
 
 import com.google.common.base.Charsets;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import me.cameronb.bot.Config;
 import me.cameronb.bot.proxy.BotProxy;
 import me.cameronb.bot.task.Task;
+import me.cameronb.bot.task.TaskInstance;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.NameValuePair;
@@ -24,7 +27,9 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Cameron on 6/25/2017.
@@ -42,6 +47,10 @@ public class CartTask extends Task {
 
     public CartTask(int threadCount) {
         super("Adidas Product Mode", Config.INSTANCE.getCartUrl());
+    }
+
+    public ObservableList<TaskInstance> getInstances() {
+        return FXCollections.observableArrayList();
     }
 
     /*public CartTask(BotProxy proxyConfig, BasicCookieStore cookies) {

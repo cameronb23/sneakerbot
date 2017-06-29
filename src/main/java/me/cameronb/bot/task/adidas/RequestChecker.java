@@ -3,6 +3,7 @@ package me.cameronb.bot.task.adidas;
 import me.cameronb.bot.Config;
 import me.cameronb.bot.browser.BrowserData;
 import me.cameronb.bot.proxy.BotProxy;
+import me.cameronb.bot.task.TaskInstance;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -24,10 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Created by Cameron on 2/9/17.
  */
-public class RequestChecker implements Runnable {
-
-    private final int id;
-    private final BotProxy proxy;
+public class RequestChecker extends TaskInstance {
     private BasicCookieStore cookieStore;
     private CloseableHttpClient client;
     private AdidasBrowser browser;
@@ -36,8 +34,7 @@ public class RequestChecker implements Runnable {
 
     // SAVE COOKIES / SESSION DATA
     public RequestChecker(int id, BotProxy proxyConfig, RequestTask creator) {
-        this.id = id;
-        this.proxy = proxyConfig;
+        super(id, proxyConfig);
         this.owner = creator;
 
         this.cookieStore = new BasicCookieStore();
@@ -46,14 +43,14 @@ public class RequestChecker implements Runnable {
 
         RequestConfig globalConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build();
 
-        if(this.proxy != null) {
+        if(getProxy() != null) {
             CredentialsProvider creds = new BasicCredentialsProvider();
-            AuthScope scope = new AuthScope(this.proxy.getAddress(), this.proxy.getPort());
+            AuthScope scope = new AuthScope(getProxy().getAddress(), getProxy().getPort());
 
-            Credentials cred = new UsernamePasswordCredentials(this.proxy.getUsername(), this.proxy.getPassword());
+            Credentials cred = new UsernamePasswordCredentials(getProxy().getUsername(), getProxy().getPassword());
             creds.setCredentials(scope, cred);
 
-            HttpHost proxy = new HttpHost(this.proxy.getAddress(), this.proxy.getPort());
+            HttpHost proxy = new HttpHost(getProxy().getAddress(), getProxy().getPort());
 
             builder
                     .setProxy(proxy)
@@ -70,6 +67,8 @@ public class RequestChecker implements Runnable {
                 .setRedirectStrategy(new LaxRedirectStrategy());
 
         this.client = builder.build();
+
+        setStatus("Idle");
     }
 
     private AtomicBoolean firstRun = new AtomicBoolean(true);
@@ -79,11 +78,14 @@ public class RequestChecker implements Runnable {
         synchronized (this) {
             try {
                 if(firstRun.get()) {
+                    setStatus("Starting...");
                     firstRun.set(false);
-                    Thread.sleep(1000 * this.id);
+                    Thread.sleep(1000 * getId());
                 }
 
-                System.out.println(String.format("(%d) Sending request", id));
+                setStatus("In splash");
+
+                System.out.println(String.format("(%d) Sending request", getId()));
                 // submit request to splash page
                 /*HttpClientContext context = HttpClientContext.create();
                 context.setCookieStore(cookieStore);*/
@@ -123,7 +125,10 @@ public class RequestChecker implements Runnable {
                         owner.getIsDone().set(true);
                     }
 
-                    System.out.println("Browser(" + id + ") passed splash(" + foundSelectors.toString() + ")");
+                    setStatus("Passed splash");
+                    setSuccess(true);
+
+                    System.out.println("Browser(" + getId() + ") passed splash(" + foundSelectors.toString() + ")");
 
                     System.out.println("Wait for browser to reload cart page with cookies.");
 
@@ -131,12 +136,13 @@ public class RequestChecker implements Runnable {
                         System.out.println(h.getName() + ":" + h.getValue());
                     }*/
 
-                    this.browser = new AdidasBrowser(owner, new BrowserData(proxy, cookieStore), res.getAllHeaders());
+                    this.browser = new AdidasBrowser(owner, new BrowserData(getProxy(), cookieStore), res.getAllHeaders());
                     this.browser.run();
                     this.browser.open();
 
                     data.close();
                     res.close();
+                    return;
                 } else {
                     data.close();
                     res.close();

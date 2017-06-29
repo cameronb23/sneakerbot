@@ -68,6 +68,8 @@ public class SplashChecker extends TaskInstance {
         } else {
             driver = new HtmlUnitDriver();
         }
+
+        setStatus("Idle");
     }
 
     public void stop() {
@@ -122,10 +124,12 @@ public class SplashChecker extends TaskInstance {
     @Override
     public void run() {
         if(firstRun) {
+            setStatus("Starting...");
             System.out.println(String.format("(%d) Starting process...", this.getId()));
             driver.navigate().to(owner.getUrl());
             firstRun = false;
         }
+        setStatus("On splash page");
         while(!owner.getIsDone().get()) {
             try {
                 Thread.sleep(5000); // wait 1 second for each additional browser to prevent spam
@@ -147,10 +151,18 @@ public class SplashChecker extends TaskInstance {
                         break;
                     }
                 }
+
+                try {
+                    Thread.sleep(owner.getDelay());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
 
             System.out.println(String.format("(%d) PASSED SPLASH [%s]", this.getId(), found));
 
+            setStatus("Passed splash");
+            setSuccess(true);
 
             System.out.println("LAST PAGE: " + driver.getCurrentUrl());
             System.out.println("ORIGINAL: " + driver.manage().getCookies());
@@ -180,6 +192,8 @@ public class SplashChecker extends TaskInstance {
             if(owner.isOnePass()) {
                 owner.getIsDone().set(true);
             }
+
+            return;
         }
     }
 
