@@ -51,8 +51,7 @@ public class Config {
     @Getter
     private boolean onePass = false;
 
-    @Getter
-    private String proxies = "~/proxies.txt";
+    // @Getter private String proxies = "~/proxies.txt";
 
     @Getter @XmlElementWrapper @XmlElement(name = "selector")
     private List<String> selectors = new ArrayList<>(Arrays.asList("[data-sitekey]"));

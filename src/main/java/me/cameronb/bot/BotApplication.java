@@ -51,15 +51,6 @@ public class BotApplication extends Application {
 
         //PropertyConfigurator.configure(System.getProperty("user.dir") + "/src/main/resources/log4j.properties");
 
-
-
-//        if(args.length < 1) {
-//            System.err.println("You must provide a config file!");
-//            System.exit(0);
-//        }
-//
-//        String configFile = args[0];
-
         try {
             Config.CONTEXT = JAXBContext.newInstance(Config.class);
         } catch (JAXBException ex) {
@@ -104,7 +95,7 @@ public class BotApplication extends Application {
 
         Parent root = FXMLLoader.load(getClass().getResource("/application.fxml"));
 
-        primaryStage.setTitle("Adislayer v0.1");
+        primaryStage.setTitle("Adislayer v0.2");
 
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);

@@ -4,6 +4,7 @@ import me.cameronb.bot.Config;
 import me.cameronb.bot.browser.BrowserData;
 import me.cameronb.bot.proxy.BotProxy;
 import me.cameronb.bot.task.TaskInstance;
+import me.cameronb.bot.util.Region;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -17,6 +18,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.*;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
@@ -72,11 +74,36 @@ public class RequestChecker extends TaskInstance {
     }
 
     private AtomicBoolean firstRun = new AtomicBoolean(true);
+    private AtomicBoolean paused = new AtomicBoolean(false);
+
+    public void jig(Region r) {
+        setStatus("Attempting to jig with " + r.getAbbrev() + " location.");
+        paused.set(true);
+
+        try {
+            CloseableHttpResponse res = client.execute(new HttpGet(r.getUrl()));
+
+            res.close();
+
+            paused.set(false);
+        } catch(IOException e) {
+            setStatus("Errored: " + e.getMessage());
+        }
+    }
 
     @Override
     public void run() {
         synchronized (this) {
+            if(getStatus().toLowerCase().contains("error")) {
+                return;
+            }
+
             try {
+                if(paused.get()) {
+                    Thread.sleep(3000);
+                    run();
+                    return;
+                }
                 if(firstRun.get()) {
                     setStatus("Starting...");
                     firstRun.set(false);
@@ -87,8 +114,8 @@ public class RequestChecker extends TaskInstance {
 
                 System.out.println(String.format("(%d) Sending request", getId()));
                 // submit request to splash page
-                /*HttpClientContext context = HttpClientContext.create();
-                context.setCookieStore(cookieStore);*/
+            /*HttpClientContext context = HttpClientContext.create();
+            context.setCookieStore(cookieStore);*/
                 if(firstRun.get()) {
                     CloseableHttpResponse initialRes = client.execute(new HttpGet(owner.getUrl()));
                     initialRes.close();
@@ -132,9 +159,9 @@ public class RequestChecker extends TaskInstance {
 
                     System.out.println("Wait for browser to reload cart page with cookies.");
 
-                    /*for(Header h : res.getAllHeaders()) {
-                        System.out.println(h.getName() + ":" + h.getValue());
-                    }*/
+                /*for(Header h : res.getAllHeaders()) {
+                    System.out.println(h.getName() + ":" + h.getValue());
+                }*/
 
                     this.browser = new AdidasBrowser(owner, new BrowserData(getProxy(), cookieStore), res.getAllHeaders());
                     this.browser.run();
@@ -155,6 +182,7 @@ public class RequestChecker extends TaskInstance {
                     }
                 }
             } catch(Exception ex) {
+                setStatus("Errored: " + ex.getMessage());
                 return;
             }
         }

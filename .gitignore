@@ -5,3 +5,4 @@ target/
 .DS_Store
 chromedriver
 /dependency-reduced-pom.xml
+dist/

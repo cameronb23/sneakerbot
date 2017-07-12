@@ -100,6 +100,26 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <transformers>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            <mainClass>me.cameronb.bot.BotApplication</mainClass>
+                        </transformer>
+                    </transformers>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.6.1</version>
                 <configuration>
@@ -118,11 +138,6 @@
                     <jvmArgs>
                         <jvmArg>./config.xml</jvmArg>
                     </jvmArgs>
-                    <trialVersion>
-                        <expireInDays>30</expireInDays>
-                        <expireMessage>Your free trial has expired! Please DM me on twitter @cgalt23.</expireMessage>
-                    </trialVersion>
-
                 </configuration>
             </plugin>
         </plugins>

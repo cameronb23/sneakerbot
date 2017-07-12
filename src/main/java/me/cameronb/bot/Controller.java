@@ -1,7 +1,11 @@
 package me.cameronb.bot;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -10,11 +14,12 @@ import javafx.util.StringConverter;
 import lombok.Getter;
 import me.cameronb.bot.task.Task;
 import me.cameronb.bot.task.TaskInstance;
-import me.cameronb.bot.task.adidas.CartTask;
-import me.cameronb.bot.task.adidas.RequestTask;
-import me.cameronb.bot.task.adidas.SplashTask;
+import me.cameronb.bot.task.adidas.*;
+import me.cameronb.bot.util.Region;
 import sun.reflect.generics.tree.Tree;
 
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.tree.TreeSelectionModel;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -28,7 +33,8 @@ public class Controller implements Initializable {
     protected enum TaskType {
         SPLASH_REQUEST("Splash - Request", "me.cameronb.bot.task.adidas.RequestTask"),
         SPLASH_BROWSER("Splash - Browser", "me.cameronb.bot.task.adidas.SplashTask"),
-        PRODUCT_CART("Product - Non Splash", "me.cameronb.bot.task.adidas.CartTask");
+        PRODUCT_CART("Product - Non Splash", "me.cameronb.bot.task.adidas.CartTask"),
+        THREAD_TESTER("Thread Test", "me.cameronb.bot.util.ThreadKiller");
 
         @Getter
         private final String displayName;
@@ -157,6 +163,52 @@ public class Controller implements Initializable {
         }
     }
 
+    @FXML private Button jigButtonCA,
+                         jigButtonUK,
+                         jigButtonFR,
+                         jigButtonDE,
+                         jigButtonUS;
+
+    @FXML
+    public void jig(ActionEvent e) {
+        Region region;
+
+        if(!(e.getSource() instanceof Button))
+            return;
+
+        Button b = (Button) e.getSource();
+
+        String regionAbbrev = b.getId().substring(b.getId().length() - 2);
+
+        region = Region.getRegion(regionAbbrev);
+
+        TreeItem<Object> selectedItem = taskListView.getSelectionModel().getSelectedItem();
+
+        if(selectedItem == null || selectedItem.getValue() == null || (!selectedItem.isLeaf())) {
+            return;
+        }
+
+        doJig(selectedItem.getValue(), region);
+    }
+
+    private void doJig(Object o, Region region) {
+        if(o instanceof Task) {
+            ((Task) o).getInstances().forEach((i) -> doJig(i, region));
+        } else if(o instanceof TaskInstance) {
+            TaskInstance i = (TaskInstance) o;
+
+            if(i instanceof RequestChecker) {
+                ((RequestChecker) i).jig(region);
+            } else if(i instanceof SplashChecker) {
+                ((SplashChecker) i).jig(region);
+            } else {
+                return;
+            }
+        } else {
+            return;
+        }
+    }
+
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -182,6 +234,7 @@ public class Controller implements Initializable {
         taskListView.setRoot(root);
         //taskListView.setEditable(false);
         taskListView.setShowRoot(false);
+        taskListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
         new Thread(new Runnable() {
             @Override
@@ -210,10 +263,6 @@ public class Controller implements Initializable {
                 run();
             }
         }).start();
-
-
-//        taskListView.setItems(BotApplication.getInstance().getTasks());
-//        taskListView.setCellFactory(param -> new TaskCell());
     }
 
 }
