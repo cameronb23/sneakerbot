@@ -1,12 +1,10 @@
 package me.cameronb.bot.task.adidas;
 
-import com.gargoylesoftware.htmlunit.*;
-import com.gargoylesoftware.htmlunit.util.*;
+import com.gargoylesoftware.htmlunit.DefaultCredentialsProvider;
+import com.gargoylesoftware.htmlunit.WebClient;
 import com.machinepublishers.jbrowserdriver.JBrowserDriver;
 import com.machinepublishers.jbrowserdriver.ProxyConfig;
 import com.machinepublishers.jbrowserdriver.Settings;
-import lombok.Getter;
-import lombok.Setter;
 import me.cameronb.bot.proxy.BotProxy;
 import me.cameronb.bot.task.TaskInstance;
 import me.cameronb.bot.util.Region;
@@ -14,15 +12,12 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.openqa.selenium.*;
 import org.openqa.selenium.Cookie;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.NoSuchWindowException;
+import org.openqa.selenium.Proxy;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
-import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
@@ -32,6 +27,7 @@ import java.util.logging.Level;
  */
 public class SplashChecker extends TaskInstance {
 
+    private final Object lock = new Object();
     private final BotProxy proxy;
     private final SplashTask owner;
     private final HtmlUnitDriver driver;
@@ -50,12 +46,6 @@ public class SplashChecker extends TaskInstance {
             }
         };
     }
-
-    /*private JBrowserDriver createDriver() {
-        ProxyConfig proxyConfig = configureProxy();
-
-        return new JBrowserDriver(build(proxyConfig));
-    }*/
 
     public SplashChecker(int id, BotProxy proxy, SplashTask owner) {
         super(id, proxy);
@@ -76,8 +66,8 @@ public class SplashChecker extends TaskInstance {
         setStatus("Idle");
     }
 
+
     public void stop() {
-        done = true;
         driver.close();
         if(checkout != null) checkout.close();
     }
@@ -120,9 +110,6 @@ public class SplashChecker extends TaskInstance {
         return settingBuilder.build();
     }
 
-    @Getter @Setter
-    private boolean done = false;
-
     private boolean firstRun = true;
     private AtomicBoolean paused = new AtomicBoolean(false);
 
@@ -131,10 +118,9 @@ public class SplashChecker extends TaskInstance {
         paused.set(true);
 
         try {
-            // todo
             driver.navigate().to(r.getUrl());
 
-            Thread.sleep(10000);
+            getThread().wait(10000);
 
             driver.navigate().to(owner.getUrl());
 
@@ -149,7 +135,7 @@ public class SplashChecker extends TaskInstance {
         synchronized (this) {
             try {
                 if(paused.get()) {
-                    Thread.sleep(owner.getDelay());
+                    getThread().wait(owner.getDelay());
                     run();
                     return;
                 }
@@ -190,16 +176,14 @@ public class SplashChecker extends TaskInstance {
                     checkout.navigate().to(driver.getCurrentUrl());
 
                     try {
-                        Thread.sleep(5000);
+                        getThread().wait(5000);
                     } catch (InterruptedException e) {}
 
                     Set<Cookie> cookieSet = driver.manage().getCookies();
 
                     System.out.println("OLD:" + cookieSet);
 
-                    for(Cookie c : cookieSet) {
-                        checkout.manage().addCookie(c);
-                    }
+                    cookieSet.forEach(c -> checkout.manage().addCookie(c));
 
                     System.out.println("NEW:" + checkout.manage().getCookies());
 
@@ -209,7 +193,7 @@ public class SplashChecker extends TaskInstance {
                         owner.getIsDone().set(true);
                     }
                 } else {
-                    Thread.sleep(owner.getDelay());
+                    getThread().wait(owner.getDelay());
                     run();
                 }
             } catch(Exception e) {
