@@ -23,6 +23,10 @@ public class Config {
     public static Config INSTANCE;
 
     // define configuration properties and default values
+
+    @Getter
+    private String license = "enter license key here";
+
     @Getter
     private String mainUrl = "http://www.adidas.com/";
 

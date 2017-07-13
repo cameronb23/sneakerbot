@@ -79,7 +79,7 @@ public class Controller implements Initializable {
                 return (((Task) item).getTitle());
             } else {
                 TaskInstance i = (TaskInstance) item;
-                return (i.getId() + 1) + " - " + i.getStatus();
+                return (i.getIdentifier() + 1) + " - " + i.getStatus();
             }
         }
 

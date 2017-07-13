@@ -7,10 +7,10 @@ import me.cameronb.bot.proxy.BotProxy;
 /**
  * Created by Cameron on 6/25/2017.
  */
-public abstract class TaskInstance implements Runnable {
+public abstract class TaskInstance extends Thread {
 
     @Getter
-    private final int id;
+    private final int identifier;
 
     @Getter
     private BotProxy proxy;
@@ -21,14 +21,13 @@ public abstract class TaskInstance implements Runnable {
     @Getter @Setter
     private String status;
 
-    @Getter @Setter
-    private Thread thread;
-
     public TaskInstance(int id, BotProxy proxyConfig) {
-        this.id = id;
+        this.identifier = id;
         this.proxy = proxyConfig;
-        this.thread = Thread.currentThread();
     }
 
-    public abstract void run();
+    @Override
+    public abstract void start();
+
+    public abstract void end();
 }

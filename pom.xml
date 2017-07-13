@@ -8,6 +8,20 @@
     <artifactId>bot</artifactId>
     <version>0.2-ALPHA</version>
 
+    <repositories>
+        <repository>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>fail</checksumPolicy>
+            </releases>
+            <id>license4j-runtime-library</id>
+            <name>License4J Runtime Library Maven Repository</name>
+            <url>https://www.license4j.com/maven/</url>
+            <layout>default</layout>
+        </repository>
+    </repositories>
+
 
     <dependencies>
         <dependency>
@@ -93,12 +107,21 @@
             <version>LATEST</version>
         </dependency>
 
+        <dependency>
+            <!--- licensing -->
+            <groupId>com.license4j</groupId>
+            <artifactId>license4j-runtime-library</artifactId>
+            <version>RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
+
     </dependencies>
 
 
     <build>
+        <finalName>${artifactId}-${version}</finalName>
         <plugins>
-            <plugin>
+            <!--<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.0.0</version>
@@ -117,7 +140,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -133,11 +156,36 @@
                 <artifactId>excelsior-jet-maven-plugin</artifactId>
                 <version>1.0.0</version>
                 <configuration>
+                    <product>${project.build.finalName}</product>
+                    <vendor>Cameron</vendor>
+                    <version>${project.version}</version>
+
                     <mainClass>me.cameronb.bot.BotApplication</mainClass>
-                    <jetHome>C:\jet11.3-eval-amd64</jetHome>
-                    <jvmArgs>
-                        <jvmArg>./config.xml</jvmArg>
-                    </jvmArgs>
+                    <jetHome>C:\jet12.0-std-x86</jetHome>
+
+                    <packageFiles>
+                        <packageFile>
+                            <path>./config.xml</path>
+                            <type>file</type>
+                        </packageFile>
+                        <packageFile>
+                            <path>./proxies.txt</path>
+                            <type>file</type>
+                        </packageFile>
+                    </packageFiles>
+
+                    <!--- installer setup -->
+                    <packaging>native-bundle</packaging>
+                    <excelsiorInstaller>
+                        <shortcuts>
+                            <shortcut>
+                                <location>desktop</location>
+                                <target>${artifactId}.exe</target>
+                                <name>Adislayer</name>
+                                <icon></icon>
+                            </shortcut>
+                        </shortcuts>
+                    </excelsiorInstaller>
                 </configuration>
             </plugin>
         </plugins>

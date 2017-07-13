@@ -26,8 +26,6 @@ public class SplashTask extends Task<SplashChecker> {
 
     private final ObservableList<SplashChecker> instances = FXCollections.observableArrayList();
 
-    @Getter private ExecutorService executor;
-
     @Getter private AtomicBoolean isDone = new AtomicBoolean(false);
 
     //@Getter private ThreadPool executor;
@@ -65,19 +63,9 @@ public class SplashTask extends Task<SplashChecker> {
     @Override
     public void run() {
         setRunning(true);
-        //executor = Executors.newWorkStealingPool(instanceCount * 2);
-        executor = Executors.newFixedThreadPool(instanceCount);
-        /*executor = new ThreadPoolExecutor(
-                1,
-                instanceCount * 2,
-                30,
-                TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(100)
-        );*/
 
         for(SplashChecker instance : instances) {
             new Thread(instance).start();
-            //executor.submit(instance);
         }
 
         for(;;) {
@@ -89,30 +77,13 @@ public class SplashTask extends Task<SplashChecker> {
 
     @Override
     public void end() {
-        this.getIsDone().set(true);
+        isDone.set(true);
+
         Iterator<SplashChecker> iter = instances.iterator();
-
-        this.isDone.set(true);
-
         while(iter.hasNext()) {
             SplashChecker instance = iter.next();
+            instance.end();
             iter.remove();
-        }
-
-        if(executor != null) {
-            try {
-                System.out.println("attempt to shutdown executor");
-                executor.shutdown();
-                executor.awaitTermination(5, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                System.err.println("tasks interrupted");
-            } finally {
-                if (!executor.isTerminated()) {
-                    System.err.println("cancel non-finished tasks");
-                }
-                executor.shutdownNow();
-                System.out.println("shutdown finished");
-            }
         }
     }
 }

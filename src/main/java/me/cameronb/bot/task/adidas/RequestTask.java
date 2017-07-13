@@ -30,9 +30,6 @@ public class RequestTask extends Task<RequestChecker> {
     private final ObservableList<RequestChecker> instances = FXCollections.observableArrayList();
 
     @Getter private ExecutorService executor;
-    //@Getter private ScheduledExecutorService executor;
-
-    //@Getter private ThreadPool executor;
 
     public RequestTask(int instanceCount) {
         super("Adidas Request", Config.INSTANCE.getSplashUrl());
@@ -64,7 +61,6 @@ public class RequestTask extends Task<RequestChecker> {
             }
 
             instances.add(instance);
-            //executor.scheduleAtFixedRate(instance, i, delay, TimeUnit.SECONDS);
         }
     }
 
@@ -75,13 +71,9 @@ public class RequestTask extends Task<RequestChecker> {
 
     @Override
     public void run() {
-        //executor = Executors.newWorkStealingPool(128);
-        //executor = new ThreadPool(instanceCount * 3);
-        executor = Executors.newFixedThreadPool(128);
-        //executor = new ThreadPoolExecutor(1, 128, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<>(100));
-        //executor = new ScheduledThreadPoolExecutor(128);
+        //executor = Executors.newFixedThreadPool(instanceCount);
         for(RequestChecker instance : instances) {
-            executor.submit(instance);
+            instance.start();
         }
 
         for(;;) {
@@ -95,17 +87,16 @@ public class RequestTask extends Task<RequestChecker> {
 
     @Override
     public void end() {
-        this.getIsDone().set(true);
+        isDone.set(true);
+
         Iterator<RequestChecker> iter = instances.iterator();
-
-        this.isDone.set(true);
-
         while(iter.hasNext()) {
             RequestChecker instance = iter.next();
+            instance.end();
             iter.remove();
         }
 
-        if(executor != null) {
+        /*if(executor != null) {
             try {
                 System.out.println("attempt to shutdown executor");
                 executor.shutdown();
@@ -119,7 +110,7 @@ public class RequestTask extends Task<RequestChecker> {
                 executor.shutdownNow();
                 System.out.println("shutdown finished");
             }
-        }
+        }*/
     }
 
     @Override

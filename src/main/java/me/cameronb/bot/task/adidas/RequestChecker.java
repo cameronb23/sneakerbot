@@ -73,8 +73,9 @@ public class RequestChecker extends TaskInstance {
         setStatus("Idle");
     }
 
-    private AtomicBoolean firstRun = new AtomicBoolean(true);
+    private AtomicBoolean running = new AtomicBoolean(true);
     private AtomicBoolean paused = new AtomicBoolean(false);
+    private boolean wasJigged = false;
 
     public void jig(Region r) {
         setStatus("Attempting to jig with " + r.getAbbrev() + " location.");
@@ -85,6 +86,7 @@ public class RequestChecker extends TaskInstance {
 
             res.close();
 
+            wasJigged = true;
             paused.set(false);
         } catch(IOException e) {
             setStatus("Errored: " + e.getMessage());
@@ -92,99 +94,117 @@ public class RequestChecker extends TaskInstance {
     }
 
     @Override
+    public void start() {
+        try {
+            setStatus("Starting...");
+            CloseableHttpResponse initialRes = client.execute(new HttpGet(owner.getUrl()));
+            initialRes.close();
+            sleep(1000 * getIdentifier());
+
+
+            run();
+        } catch(Exception e) {
+            setStatus("Errored: " + e.getMessage());
+            return;
+        }
+    }
+
+    @Override
+    public void end() {
+        running.set(false);
+        setStatus("Ended");
+    }
+
     public void run() {
-        synchronized (this) {
-            if(getStatus().toLowerCase().contains("error")) {
+        if(!running.get()) {
+            return;
+        }
+        if(getStatus().toLowerCase().contains("error")) {
+            return;
+        }
+
+        try {
+            if(wasJigged) {
+                wasJigged = false;
+                CloseableHttpResponse initialRes = client.execute(new HttpGet(owner.getUrl()));
+                initialRes.close();
+                sleep(5000);
+                run();
                 return;
             }
 
-            try {
-                if(paused.get()) {
-                    Thread.sleep(3000);
-                    run();
-                    return;
+            if(paused.get()) {
+                sleep(3000);
+                run();
+                return;
+            }
+
+            setStatus("In splash");
+
+            //System.out.println(String.format("(%d) Sending request", getId()));
+
+            CloseableHttpResponse res = client.execute(new HttpGet(owner.getUrl()));
+            InputStream data = res.getEntity().getContent();
+
+            System.out.println("COOKIE LIST: " + cookieStore.toString());
+
+
+            Set<String> foundSelectors = new HashSet<>();
+            boolean contains = false;
+            String result = IOUtils.toString(data, "UTF-8");
+
+            for(String s : owner.getSelectors()) {
+                if(result.contains(s)) {
+                    foundSelectors.add(s);
+                    contains = true;
                 }
-                if(firstRun.get()) {
-                    setStatus("Starting...");
-                    firstRun.set(false);
-                    Thread.sleep(1000 * getId());
+            }
+
+            for(Cookie c : cookieStore.getCookies()) {
+                if(c.getName().toLowerCase().contains("gceeqs") ||
+                        c.getValue().toLowerCase().contains("hmac")) {
+                    foundSelectors.add("dwsid");
+                    contains = true;
                 }
+            }
 
-                setStatus("In splash");
-
-                System.out.println(String.format("(%d) Sending request", getId()));
-                // submit request to splash page
-            /*HttpClientContext context = HttpClientContext.create();
-            context.setCookieStore(cookieStore);*/
-                if(firstRun.get()) {
-                    CloseableHttpResponse initialRes = client.execute(new HttpGet(owner.getUrl()));
-                    initialRes.close();
-                    firstRun.set(false);
-                }
-
-                CloseableHttpResponse res = client.execute(new HttpGet(owner.getUrl()));
-                InputStream data = res.getEntity().getContent();
-
-                System.out.println("COOKIE LIST: " + cookieStore.toString());
-
-
-                Set<String> foundSelectors = new HashSet<>();
-                boolean contains = false;
-                String result = IOUtils.toString(data, "UTF-8");
-
-                for(String s : owner.getSelectors()) {
-                    if(result.contains(s)) {
-                        foundSelectors.add(s);
-                        contains = true;
-                    }
-                }
-
-                for(Cookie c : cookieStore.getCookies()) {
-                    if(c.getName().toLowerCase().contains("gceeqs") ||
-                            c.getValue().toLowerCase().contains("hmac")) {
-                        foundSelectors.add("dwsid");
-                        contains = true;
-                    }
+            if(contains) {
+                if(owner.isOnePass()) {
+                    owner.getIsDone().set(true);
                 }
 
-                if(contains) {
-                    if(owner.isOnePass()) {
-                        owner.getIsDone().set(true);
-                    }
+                setStatus("Passed splash");
+                setSuccess(true);
 
-                    setStatus("Passed splash");
-                    setSuccess(true);
+                System.out.println("Browser(" + getId() + ") passed splash(" + foundSelectors.toString() + ")");
 
-                    System.out.println("Browser(" + getId() + ") passed splash(" + foundSelectors.toString() + ")");
+                System.out.println("Wait for browser to reload cart page with cookies.");
 
-                    System.out.println("Wait for browser to reload cart page with cookies.");
+            /*for(Header h : res.getAllHeaders()) {
+                System.out.println(h.getName() + ":" + h.getValue());
+            }*/
 
-                /*for(Header h : res.getAllHeaders()) {
-                    System.out.println(h.getName() + ":" + h.getValue());
-                }*/
+                this.browser = new AdidasBrowser(owner, new BrowserData(getProxy(), cookieStore), res.getAllHeaders());
+                this.browser.run();
+                this.browser.open();
 
-                    this.browser = new AdidasBrowser(owner, new BrowserData(getProxy(), cookieStore), res.getAllHeaders());
-                    this.browser.run();
-                    this.browser.open();
-
-                    data.close();
-                    res.close();
+                data.close();
+                res.close();
+                return;
+            } else {
+                data.close();
+                res.close();
+                sleep(owner.getDelay());
+                if(owner.getIsDone().get()) {
+                    client.close();
                     return;
                 } else {
-                    data.close();
-                    res.close();
-                    Thread.sleep(owner.getDelay() * 1000);
-                    if(owner.getIsDone().get()) {
-                        client.close();
-                        return;
-                    } else {
-                        run();
-                    }
+                    run();
                 }
-            } catch(Exception ex) {
-                setStatus("Errored: " + ex.getMessage());
-                return;
             }
+        } catch(Exception ex) {
+            setStatus("Errored: " + ex.getMessage());
+            return;
         }
     }
 }

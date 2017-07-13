@@ -67,12 +67,6 @@ public class SplashChecker extends TaskInstance {
     }
 
 
-    public void stop() {
-        driver.close();
-        if(checkout != null) checkout.close();
-    }
-
-
 
     private ProxyConfig configureProxy() {
         ProxyConfig p;
@@ -110,20 +104,18 @@ public class SplashChecker extends TaskInstance {
         return settingBuilder.build();
     }
 
-    private boolean firstRun = true;
+    private AtomicBoolean running = new AtomicBoolean(true);
     private AtomicBoolean paused = new AtomicBoolean(false);
+    private boolean wasJigged = false;
 
     public void jig(Region r) {
-        setStatus("Attempting to jig with " + r.getAbbrev() + " location.");
+        setStatus("Attempting to bypass with " + r.getAbbrev() + " location.");
         paused.set(true);
 
         try {
             driver.navigate().to(r.getUrl());
 
-            getThread().wait(10000);
-
-            driver.navigate().to(owner.getUrl());
-
+            wasJigged = true;
             paused.set(false);
         } catch(Exception e) {
             setStatus("Errored: " + e.getMessage());
@@ -131,75 +123,91 @@ public class SplashChecker extends TaskInstance {
     }
 
     @Override
+    public void start() {
+        setStatus("Starting...");
+        System.out.println(String.format("(%d) Starting process...", this.getId()));
+        driver.navigate().to(owner.getUrl());
+        run();
+    }
+
+    @Override
+    public void end() {
+        running.set(false);
+        driver.close();
+        if(checkout != null) checkout.close();
+    }
+
     public void run() {
-        synchronized (this) {
-            try {
-                if(paused.get()) {
-                    getThread().wait(owner.getDelay());
-                    run();
-                    return;
-                }
-                if(firstRun) {
-                    setStatus("Starting...");
-                    System.out.println(String.format("(%d) Starting process...", this.getId()));
-                    driver.navigate().to(owner.getUrl());
-                    firstRun = false;
-                }
-                setStatus("On splash page");
-
-                String found = null;
-
-                for (String s : owner.getSelectors()) {
-                    try {
-                        if(driver.findElementByCssSelector(s) != null) {
-                            found = s;
-                        }
-                    } catch (NoSuchElementException e) {
-                    } catch(NoSuchWindowException e) {
-                        break;
-                    }
-                }
-
-                if(found != null) {
-                    System.out.println(String.format("(%d) PASSED SPLASH [%s]", this.getId(), found));
-
-                    setStatus("Passed splash");
-                    setSuccess(true);
-
-                    System.out.println("LAST PAGE: " + driver.getCurrentUrl());
-                    System.out.println("ORIGINAL: " + driver.manage().getCookies());
-
-                    ProxyConfig proxyConfig = configureProxy();
-
-                    checkout = new JBrowserDriver(build(proxyConfig));
-
-                    checkout.navigate().to(driver.getCurrentUrl());
-
-                    try {
-                        getThread().wait(5000);
-                    } catch (InterruptedException e) {}
-
-                    Set<Cookie> cookieSet = driver.manage().getCookies();
-
-                    System.out.println("OLD:" + cookieSet);
-
-                    cookieSet.forEach(c -> checkout.manage().addCookie(c));
-
-                    System.out.println("NEW:" + checkout.manage().getCookies());
-
-                    checkout.get(driver.getCurrentUrl());
-
-                    if(owner.isOnePass()) {
-                        owner.getIsDone().set(true);
-                    }
-                } else {
-                    getThread().wait(owner.getDelay());
-                    run();
-                }
-            } catch(Exception e) {
-                setStatus("Errored: " + e.getMessage());
+        if(!running.get()) {
+            return;
+        }
+        try {
+            if(wasJigged) {
+                wasJigged = false;
+                driver.navigate().to(owner.getUrl());
+                sleep(5000);
+                run();
                 return;
             }
+            if(paused.get()) {
+                sleep(owner.getDelay());
+                run();
+                return;
+            }
+            setStatus("On splash page");
+
+            String found = null;
+
+            for (String s : owner.getSelectors()) {
+                try {
+                    if(driver.findElementByCssSelector(s) != null) {
+                        found = s;
+                    }
+                } catch (NoSuchElementException e) {
+                } catch(NoSuchWindowException e) {
+                    break;
+                }
+            }
+
+            if(found != null) {
+                System.out.println(String.format("(%d) PASSED SPLASH [%s]", this.getId(), found));
+
+                setStatus("Passed splash");
+                setSuccess(true);
+
+                System.out.println("LAST PAGE: " + driver.getCurrentUrl());
+                System.out.println("ORIGINAL: " + driver.manage().getCookies());
+
+                ProxyConfig proxyConfig = configureProxy();
+
+                checkout = new JBrowserDriver(build(proxyConfig));
+
+                checkout.navigate().to(driver.getCurrentUrl());
+
+                try {
+                    sleep(5000);
+                } catch (InterruptedException e) {}
+
+                Set<Cookie> cookieSet = driver.manage().getCookies();
+
+                System.out.println("OLD:" + cookieSet);
+
+                cookieSet.forEach(c -> checkout.manage().addCookie(c));
+
+                System.out.println("NEW:" + checkout.manage().getCookies());
+
+                checkout.get(driver.getCurrentUrl());
+
+                if(owner.isOnePass()) {
+                    owner.getIsDone().set(true);
+                }
+            } else {
+                sleep(owner.getDelay());
+                run();
+            }
+        } catch(Exception e) {
+            setStatus("Errored: " + e.getMessage());
+            return;
         }
     }
 
